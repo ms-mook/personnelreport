@@ -1,0 +1,45 @@
+/* ===== motion.css: แอนิเมชันทั้งหมด — ปิดอัตโนมัติเมื่อเครื่องตั้ง "ลดการเคลื่อนไหว" ===== */
+  @keyframes m-fade-up   { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @keyframes m-pop       { from { opacity: 0; transform: scale(.94); }       to { opacity: 1; transform: none; } }
+  @keyframes m-fade      { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes m-slide-in  { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
+  @keyframes m-slide-out { to   { opacity: 0; transform: translateX(28px); } }
+  @keyframes m-ring      { 0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-error) 35%, transparent); } 70%, 100% { box-shadow: 0 0 0 10px transparent; } }
+  @keyframes m-shimmer   { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+  /* การ์ด/KPI ไหลขึ้นทีละใบ (ตั้ง --i เป็นลำดับ) */
+  .m-fade-up { animation: m-fade-up .5s cubic-bezier(.22,.8,.3,1) both; animation-delay: calc(var(--i, 0) * 55ms); }
+  .m-pop     { animation: m-pop .35s cubic-bezier(.2,.9,.3,1.2) both; }
+  .m-view    { animation: m-fade .28s ease-out both; }
+
+  /* การ์ดลอยเมื่อชี้ */
+  .m-lift { transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+  .m-lift:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(16,24,40,.10); }
+
+  /* KPI สีแดง: วงแหวนเต้นเบา ๆ ให้สังเกตเห็น */
+  .stf-kpi.bad .m-icon { animation: m-ring 2.4s ease-out infinite; }
+
+  /* modal / toast */
+  .stf-modal.modal-open { animation: m-fade .18s ease-out both; }
+  .stf-modal .modal-box { animation: m-pop .25s cubic-bezier(.2,.9,.3,1.15) both; }
+  #toasts .alert { animation: m-slide-in .32s cubic-bezier(.2,.9,.3,1) both; }
+  #toasts .alert.m-out { animation: m-slide-out .25s ease-in both; }
+
+  /* ปุ่ม: กดแล้วยุบเล็กน้อย / ไอคอนขยับเมื่อชี้ */
+  .btn { transition: transform .12s ease, background-color .2s ease, border-color .2s ease, box-shadow .2s ease; }
+  .btn:active:not(:disabled) { transform: scale(.97); }
+  .btn:hover:not(:disabled) > svg { transform: translateY(-1px); }
+  .btn > svg { transition: transform .2s ease; }
+
+  /* แถวในตาราง */
+  .stf-tbl tbody tr { transition: background-color .15s ease; }
+  .stf-tbl tbody tr:hover td { background: color-mix(in oklab, var(--color-primary) 5%, transparent); }
+  .stf-tbl tbody tr.short:hover td { background: color-mix(in oklab, var(--color-error) 11%, var(--color-base-100)); }
+
+  /* โครงรอโหลด (skeleton) */
+  .m-skel { border-radius: .6rem; min-height: 1em; background: linear-gradient(90deg, var(--color-base-200) 25%, var(--color-base-300) 45%, var(--color-base-200) 65%); background-size: 200% 100%; animation: m-shimmer 1.3s linear infinite; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  }
+  @media print { *, *::before, *::after { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; } }

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>รายงานอัตรากำลัง — หน่วยเจาะเลือดเก็บสิ่งส่งตรวจและ POCT</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%233b4fd8%27/%3E%3Ctext x=%2716%27 y=%2721%27 font-size=%2711%27 font-family=%27sans-serif%27 font-weight=%27700%27 text-anchor=%27middle%27 fill=%27white%27%3EBRS%3C/text%3E%3C/svg%3E">
+
+  <!-- ===== ไลบรารีจาก CDN (jsDelivr ทั้งหมด) ===== -->
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- ===== สไตล์ (แยกจากสคริปต์) ===== -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+  <link href="/css/motion.css" rel="stylesheet">
+</head>
+<body class="bg-base-200 text-base-content min-h-screen">
+
+  <!-- ===== หน้าเข้าสู่ระบบ ===== -->
+  <div id="vLogin" class="stf-login stf-hide min-h-screen grid place-items-center p-5">
+    <div class="card bg-base-100 border border-base-300 shadow-xl w-full max-w-sm m-pop">
+      <div class="card-body p-7 gap-0">
+        <div class="stf-logo size-12 text-sm mb-3">BRS</div>
+        <h1 class="text-xl font-bold">รายงานอัตรากำลัง</h1>
+        <div class="stf-muted">หน่วยเจาะเลือดเก็บสิ่งส่งตรวจและ POCT</div>
+        <form id="loginForm" autocomplete="off" class="mt-3 flex flex-col gap-3">
+          <label class="stf-field">รหัสพนักงาน (Staff ID)
+            <span class="input w-full"><i data-lucide="user-round" class="size-4 opacity-60"></i>
+              <input id="lgId" autocomplete="username" required placeholder="เช่น S001"></span>
+          </label>
+          <label class="stf-field">PIN
+            <span class="input w-full"><i data-lucide="key-round" class="size-4 opacity-60"></i>
+              <input id="lgPin" type="password" inputmode="numeric" autocomplete="current-password" required placeholder="••••"></span>
+          </label>
+          <button class="btn btn-primary w-full mt-2" type="submit" id="lgBtn"><i data-lucide="log-in" class="size-4"></i> เข้าสู่ระบบ</button>
+          <div class="stf-err" id="lgErr"></div>
+        </form>
+        <button type="button" class="btn btn-ghost btn-sm w-full stf-hide" id="lgBack"><i data-lucide="arrow-left" class="size-4"></i> ดู Dashboard โดยไม่ต้องเข้าสู่ระบบ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ตัวแอป ===== -->
+  <div id="vApp" class="stf-hide">
+    <header class="stf-top navbar sticky top-0 z-30 bg-base-100 border-b border-base-300 shadow-sm px-3 md:px-5 gap-x-3 gap-y-1 flex-wrap min-h-14">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="stf-logo size-9 text-xs">BRS</div>
+        <div class="leading-tight min-w-0">
+          <div class="font-bold">รายงานอัตรากำลัง</div>
+          <div class="stf-sub hide-sm truncate" id="orgName"></div>
+        </div>
+      </div>
+      <nav class="stf-nav flex gap-1 order-3 md:order-none w-full md:w-auto md:ml-4 overflow-x-auto" id="nav">
+        <button data-view="entry" class="btn btn-ghost btn-sm stf-hide"><i data-lucide="square-pen" class="size-4"></i> กรอกอัตรากำลัง</button>
+        <button data-view="dash" class="btn btn-ghost btn-sm"><i data-lucide="layout-dashboard" class="size-4"></i> Dashboard</button>
+        <button data-view="admin" class="btn btn-ghost btn-sm stf-hide"><i data-lucide="shield-check" class="size-4"></i> ผู้ดูแลระบบ</button>
+      </nav>
+      <div class="stf-user flex items-center gap-2 ml-auto text-sm">
+        <button class="btn btn-primary btn-sm stf-hide" id="btnLogin"><i data-lucide="log-in" class="size-4"></i> เข้าสู่ระบบ</button>
+        <span id="userName" class="font-medium hidden sm:inline"></span>
+        <span class="badge badge-ghost badge-sm" id="userRole"></span>
+        <button class="btn btn-ghost btn-sm btn-square" id="btnPin" title="เปลี่ยน PIN" aria-label="เปลี่ยน PIN"><i data-lucide="key-round" class="size-4"></i></button>
+        <button class="btn btn-ghost btn-sm btn-square" id="btnLogout" title="ออกจากระบบ" aria-label="ออกจากระบบ"><i data-lucide="log-out" class="size-4"></i></button>
+      </div>
+    </header>
+    <main id="main" class="stf-main"></main>
+  </div>
+
+  <div id="toasts" class="toast toast-top toast-end z-[60] mt-14"></div>
+  <div id="modalRoot"></div>
+  <div id="loading" class="stf-loading stf-hide"><span class="loading loading-spinner loading-lg text-primary"></span></div>
+
+  <!-- ===== สคริปต์ (แยกจาก HTML/CSS) ===== -->
+  <script src="/js/ui.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/charts.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

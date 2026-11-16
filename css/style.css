@@ -1,0 +1,158 @@
+/* ===== style.css: ธีม + เลย์เอาต์ + พิมพ์ + มือถือ (ใช้ร่วมกับ Tailwind/DaisyUI) ===== */
+  /* ---------- ธีมแบรนด์ (ทับธีม light ของ daisyUI) ---------- */
+  [data-theme="light"] {
+    --color-primary: oklch(48.5% 0.215 264);
+    --color-primary-content: oklch(98% 0 0);
+    --color-secondary: oklch(60% 0.19 40);
+    --color-secondary-content: oklch(98% 0 0);
+    --color-accent: oklch(55% 0.16 200);
+    --color-neutral: oklch(30% 0.03 260);
+    --color-info: oklch(55% 0.17 250);
+    --color-success: oklch(48% 0.12 156);
+    --color-warning: oklch(55% 0.14 60);
+    --color-error: oklch(48% 0.19 27);
+    --color-base-100: oklch(100% 0 0);
+    --color-base-200: oklch(97.4% 0.004 255);
+    --color-base-300: oklch(92.5% 0.008 255);
+    --color-base-content: oklch(22% 0.03 260);
+    --radius-box: 0.75rem;
+    --radius-field: 0.5rem;
+    --radius-selector: 0.5rem;
+    --stf-s1: #2a78d6;      /* สีชุดข้อมูลกราฟ: มาปฏิบัติงาน */
+    --stf-s2: #eb6834;      /* สีชุดข้อมูลกราฟ: ขาด */
+    --stf-ref: #667085;     /* เส้นอ้างอิง/แผน */
+    --stf-muted: color-mix(in oklab, var(--color-base-content) 62%, transparent);
+    --stf-bad-bg: color-mix(in oklab, var(--color-error) 7%, var(--color-base-100));
+    --stf-bad-line: color-mix(in oklab, var(--color-error) 28%, var(--color-base-100));
+  }
+  html { font-family: 'Sarabun', system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 15px; background: var(--color-base-200); }
+  button, input, select, textarea { font-family: inherit; }
+  .stf-hide { display: none !important; }
+
+  /* ---------- ส่วนประกอบเล็ก ๆ ที่ใช้ซ้ำ ---------- */
+  .stf-logo { display: grid; place-items: center; flex: none; border-radius: 0.6rem; font-weight: 700; letter-spacing: .3px;
+    color: var(--color-primary-content); background: linear-gradient(135deg, var(--color-primary), color-mix(in oklab, var(--color-primary) 70%, #7c3aed)); }
+  .stf-sub { font-size: 12px; color: var(--stf-muted); }
+  .stf-muted { color: var(--stf-muted); font-size: 13px; }
+  .stf-field { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; font-weight: 500; color: var(--stf-muted); }
+  .stf-field > .input, .stf-field > .select { color: var(--color-base-content); font-weight: 400; font-size: 14.5px; }
+  .stf-err { color: var(--color-error); font-size: 13px; min-height: 18px; }
+  .stf-nav .on { background: color-mix(in oklab, var(--color-primary) 12%, transparent); color: var(--color-primary); font-weight: 600; }
+  .stf-login { background:
+    radial-gradient(60rem 30rem at 85% -10%, color-mix(in oklab, var(--color-primary) 14%, transparent), transparent 60%),
+    radial-gradient(40rem 24rem at -10% 110%, color-mix(in oklab, var(--color-secondary) 12%, transparent), transparent 60%),
+    var(--color-base-200); }
+  .stf-loading { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; background: rgba(255,255,255,.55); backdrop-filter: blur(1px); }
+
+  .stf-main { padding: 18px 20px 120px; max-width: 1280px; margin: 0 auto; }
+  .stf-main.wide { max-width: none; }
+  .stf-h h1 { font-size: 20px; font-weight: 700; line-height: 1.3; }
+  .stf-card h2 { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
+  .stf-card h2 small { font-weight: 400; color: var(--stf-muted); font-size: 13px; margin-left: 6px; }
+  .stf-grid > * { min-width: 0; }
+
+  /* ---------- การ์ดตัวเลข (KPI) ---------- */
+  .stf-kpi.bad { background: var(--stf-bad-bg); border-color: var(--stf-bad-line); }
+  .stf-kpi .m-icon.chip-bad { background: color-mix(in oklab, var(--color-error) 13%, var(--color-base-100)); color: var(--color-error); }
+  .stf-kpi .m-icon.chip-ok  { background: color-mix(in oklab, var(--color-success) 14%, var(--color-base-100)); color: var(--color-success); }
+  .stf-kpi .v { font-variant-numeric: tabular-nums; }
+  .stf-kpi .v small { font-size: 14px; font-weight: 500; color: var(--stf-muted); margin-left: 2px; }
+
+  /* ---------- ตาราง ---------- */
+  .stf-tbl-wrap { overflow-x: auto; }
+  table.stf-tbl { font-size: 14px; }
+  .stf-tbl th { white-space: nowrap; font-size: 13px; font-weight: 600; color: var(--stf-muted); background: var(--color-base-200); }
+  .stf-tbl td.num, .stf-tbl th.num { text-align: center; font-variant-numeric: tabular-nums; }
+  .stf-tbl tr.short td { background: var(--stf-bad-bg); }
+  .stf-tbl tr.grp td { background: var(--color-base-200); font-weight: 600; color: var(--stf-muted); font-size: 13px; }
+
+  /* ---------- หน้ากรอก ---------- */
+  .stf-room-h { display: flex; align-items: center; gap: 8px; font-weight: 700; margin-bottom: 8px; }
+  .stf-room-h .stf-sub { font-weight: 400; }
+  .stf-pt, .stf-pt-head { display: grid; grid-template-columns: minmax(180px, 1fr) 96px 96px 130px minmax(160px, 1fr); gap: 10px; align-items: center; }
+  .stf-pt { padding: 10px 6px; border-top: 1px solid var(--color-base-200); border-radius: 8px; transition: background-color .25s ease; }
+  .stf-pt:first-of-type { border-top: 0; }
+  .stf-pt .nm { font-weight: 500; }
+  .stf-pt .nm small { display: block; color: var(--stf-muted); font-weight: 400; font-size: 12px; }
+  .stf-pt .input { width: 100%; text-align: center; font-size: 17px; font-weight: 600; }
+  .stf-pt .input.note { text-align: left; font-size: 14px; font-weight: 400; }
+  .stf-pt.short { background: linear-gradient(90deg, var(--stf-bad-bg), transparent); }
+  .stf-pt-head { font-size: 12px; color: var(--stf-muted); padding: 0 6px 4px; }
+  .stf-pt-head span:nth-child(2), .stf-pt-head span:nth-child(3), .stf-pt-head span:nth-child(4) { text-align: center; }
+  .stf-pt .lbl { display: none; }
+  .stf-pt .diff { display: flex; justify-content: center; }
+  .stf-dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: var(--color-base-100); border-top: 1px solid var(--color-base-300);
+    box-shadow: 0 -6px 16px rgba(16,24,40,.07); }
+  .stf-dock-in { max-width: 1280px; margin: 0 auto; padding: 10px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .stf-dock .sum { display: flex; gap: 16px; font-size: 14px; color: var(--stf-muted); flex-wrap: wrap; }
+  .stf-dock .sum b { color: var(--color-base-content); font-size: 18px; font-variant-numeric: tabular-nums; }
+  .stf-dock .sum .bad b { color: var(--color-error); }
+  .stf-dock .btn { margin-left: auto; }
+
+  /* ---------- กราฟ ---------- */
+  .stf-chart { position: relative; height: 260px; }
+  .stf-legend { display: flex; gap: 14px; font-size: 13px; color: var(--stf-muted); margin-bottom: 6px; flex-wrap: wrap; }
+  .stf-legend i { display: inline-block; width: 14px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 5px; }
+  .stf-legend i.dash { background: repeating-linear-gradient(90deg, var(--stf-ref) 0 4px, transparent 4px 7px) !important; height: 2px; }
+
+  /* ---------- Dashboard + หน้ากรอก: พื้นหลังเขียวอ่อนไล่ระดับ ---------- */
+  body.stf-green-bg {
+    background: linear-gradient(165deg, #f4fbf6 0%, #e3f6ea 38%, #d0eedc 72%, #bfe6cf 100%) fixed;
+  }
+  body.stf-green-bg .stf-top { border-bottom-color: #bfe3cc; }
+  body.stf-green-bg .stf-card, body.stf-green-bg .stf-kpi { border-color: #cfe9d9; box-shadow: 0 2px 10px rgba(52, 150, 98, .10); }
+  body.stf-green-bg .stf-kpi.bad { border-color: var(--stf-bad-line); }
+  body.stf-green-bg .stf-dock { border-top-color: #bfe3cc; }
+
+  /* ---------- Admin: พื้นหลังชมพูพาสเทลไล่ระดับ ---------- */
+  body.stf-admin-bg {
+    background: linear-gradient(165deg, #fff4f8 0%, #ffe6ee 38%, #fdd5e4 72%, #f8c8dc 100%) fixed;
+  }
+  body.stf-admin-bg .stf-top { border-bottom-color: #f7c6d9; }
+  body.stf-admin-bg .stf-tabs { border-bottom-color: #f3b9d0; }
+  body.stf-admin-bg .stf-card { border-color: #f7d3e1; box-shadow: 0 2px 10px rgba(219, 112, 147, .12); }
+
+  /* ---------- Admin ---------- */
+  .stf-form-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-bottom: 12px; }
+  .stf-tabs { overflow-x: auto; margin-bottom: 14px; }
+  .stf-tabs .tab { white-space: nowrap; }
+
+  /* ---------- Modal ---------- */
+  .stf-modal { z-index: 50; }
+  .stf-modal-box { max-height: 90vh; }
+  .stf-modal-b { font-size: 14px; color: var(--stf-muted); }
+  .stf-modal-b .stf-field { margin-bottom: 10px; }
+  .stf-modal-b b { color: var(--color-base-content); }
+
+  /* ---------- พิมพ์ (A4 แนวตั้ง) ---------- */
+  .stf-print-only { display: none; }
+  @media print {
+    @page { size: A4 portrait; margin: 12mm; }
+    html, body { background: #fff !important; font-size: 12px; }
+    .stf-top, .stf-ctrl, .stf-dock, #toasts, .stf-noprint, .stf-tabs { display: none !important; }
+    .stf-print-only { display: block; }
+    .stf-main { padding: 0; max-width: none; }
+    .stf-card, .stf-kpi { box-shadow: none !important; break-inside: avoid; }
+    .stf-kpis { grid-template-columns: repeat(5, 1fr) !important; }
+    .stf-grid { grid-template-columns: 1fr 1fr !important; }
+    .stf-chart { height: 200px; }
+    .stf-tbl tr.short td, .stf-kpi.bad, .badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+
+  /* ---------- มือถือ ---------- */
+  @media (max-width: 720px) {
+    .stf-sub.hide-sm { display: none; }
+    .stf-main { padding: 12px 12px 150px; }
+    .stf-pt-head { display: none; }
+    .stf-pt { grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 12px 8px; border: 1px solid var(--color-base-300); margin-bottom: 8px; }
+    .stf-pt:first-of-type { border-top: 1px solid var(--color-base-300); }
+    .stf-pt .nm { grid-column: 1 / -1; }
+    .stf-pt .note-w { grid-column: 1 / -1; }
+    .stf-pt .lbl { display: block; font-size: 11px; color: var(--stf-muted); text-align: center; margin-bottom: 2px; }
+    .stf-pt .note-w .lbl { text-align: left; }
+    .stf-pt .diff { align-self: end; }
+    .stf-dock-in { padding: 8px 12px; }
+    .stf-dock .btn { width: 100%; }
+    .stf-kpi .v { font-size: 24px; }
+    .stf-tbl-wrap .stf-tbl { min-width: 560px; }
+  }
