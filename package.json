@@ -2,6 +2,13 @@
   "name": "personnelreport",
   "private": true,
   "description": "รายงานอัตรากำลัง หน่วยเจาะเลือดเก็บสิ่งส่งตรวจและ POCT — หน้าเว็บบน Vercel + หลังบ้าน Google Apps Script/Sheets",
-  "engines": { "node": ">=18" },
-  "scripts": {}
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "css": "node scripts/build-css.js"
+  },
+  "devDependencies": {
+    "tailwindcss": "4.3.3"
+  }
 }

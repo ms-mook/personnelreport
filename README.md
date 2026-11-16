@@ -23,7 +23,15 @@
 | `vercel.json` | ตั้งค่า Vercel (เวลารอสูงสุด 60 วินาที, header ความปลอดภัย) |
 | `gas/` | โค้ดหลังบ้านสำหรับ **คัดลอกไปวางใน Apps Script** (Vercel ไม่ได้รันไฟล์ในโฟลเดอร์นี้) |
 
-ไลบรารีโหลดจาก jsDelivr: Tailwind CSS 4 (browser), daisyUI 5, Lucide 0.469.0, Chart.js 4.4.1
+| `css/tailwind.css` | Tailwind ที่สร้างไว้ล่วงหน้า (สร้างด้วย `npm run css` — ห้ามแก้มือ) |
+| `scripts/build-css.js` | สคริปต์สร้าง `css/tailwind.css` จากคลาสที่ใช้ใน `index.html` และ `js/` |
+
+ไลบรารีโหลดจาก jsDelivr: daisyUI 5, Lucide 0.469.0, Chart.js 4.4.1 (Tailwind 4.3.3 สร้างเป็นไฟล์ไว้ล่วงหน้า ไม่แปลงในเบราว์เซอร์)
+
+### ความเร็วโหลดหน้าแรก
+- เปิดหน้าโดยไม่ล็อกอิน เรียก Apps Script **รอบเดียว** (`publicBoot` ส่งเมนู + Dashboard มาพร้อมกัน)
+- ข้อมูล Dashboard สาธารณะล่าสุดจำไว้ในเครื่อง (ไม่เกิน 24 ชม. ไม่มีหมายเหตุ/ชื่อผู้บันทึก) — เปิดครั้งถัดไปเห็นทันที แล้วอัปเดตเป็นข้อมูลใหม่เอง
+- ล็อกอินอยู่แล้ว: `me` ส่งเมนูมาด้วย ไม่ต้องเรียกซ้ำ
 
 ---
 
@@ -72,6 +80,7 @@
 ## อัปเดตครั้งต่อไป
 
 - **แก้หน้าเว็บ** (`index.html`, `css/`, `js/`, `api/`): commit + push ขึ้น `main` → Vercel deploy ให้อัตโนมัติ (ไม่ต้อง Ctrl+F5)
+  - ถ้าเพิ่ม/เปลี่ยนคลาส Tailwind: รัน `npm install && npm run css` แล้ว commit `css/tailwind.css` ด้วย
 - **แก้หลังบ้าน** (`gas/`): คัดลอกไฟล์ไปวางใน Apps Script เอง → **Deploy → Manage deployments → ✏ → New version**
 
 ## เลิกใช้หน้าเว็บเก่าใน Apps Script (ทำเมื่อพร้อม)

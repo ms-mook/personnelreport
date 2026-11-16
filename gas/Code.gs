@@ -277,7 +277,7 @@ function changePin_(user, p) {
 function ROUTES_() {
   const ANY = ['viewer', 'staff', 'admin'], ENTRY = ['staff', 'admin'], ADMIN = ['admin'];
   return {
-    me: [ANY, (u) => ({ user: u, appName: APP_NAME, org: settings_().ORG_NAME, today: today_() })],
+    me: [ANY, (u) => ({ user: u, appName: APP_NAME, org: settings_().ORG_NAME, today: today_(), meta: getMeta_() })],
     logout: [ANY, (u, p, token) => { CacheService.getScriptCache().remove('tok_' + token); return true; }],
     changePin: [ANY, changePin_],
     getMeta: [ANY, () => getMeta_()],
@@ -307,7 +307,7 @@ function ROUTES_() {
 function api(action, token, payload) {
   try {
     if (action === 'login') return { ok: true, data: login_(payload) };
-    if (action === 'publicMeta' || action === 'publicDashboard') return publicApi_(action, payload || {});
+    if (action === 'publicMeta' || action === 'publicDashboard' || action === 'publicBoot') return publicApi_(action, payload || {});
     const route = ROUTES_()[action];
     if (!route) return { ok: false, code: 'BAD', message: 'คำสั่งไม่ถูกต้อง' };
     const user = session_(token);
@@ -329,6 +329,14 @@ function bumpPub_() { try { CacheService.getScriptCache().put('pubver', String(D
 function publicApi_(action, p) {
   if (!bool_(settings_().PUBLIC_DASHBOARD)) return { ok: false, code: 'PUBLIC_OFF', message: 'ไม่ได้เปิดให้ดู Dashboard โดยไม่เข้าสู่ระบบ' };
   if (action === 'publicMeta') return { ok: true, data: getMeta_() };
+  if (action === 'publicBoot') {
+    // เปิดหน้าเว็บครั้งแรก: ส่งเมนู + Dashboard ค่าเริ่มต้นกลับไปในรอบเดียว (ลดการเรียกต่อกันหลายรอบ)
+    const meta = getMeta_();
+    const state = { date: meta.today, slotId: meta.slots.length > 1 ? 'ALL' : (meta.slots[0] && meta.slots[0].id) || '', days: 30 };
+    const dash = publicApi_('publicDashboard', state);
+    if (!dash.ok) return dash;
+    return { ok: true, data: { meta: meta, state: state, dash: dash.data } };
+  }
   const date = isYmd_(p.date) ? p.date : today_();
   const key = 'pub_' + pubVer_() + '_' + [date, String(p.slotId || '').slice(0, 10), Number(p.days) || 30].join('|');
   const cache = CacheService.getScriptCache();

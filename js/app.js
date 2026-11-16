@@ -106,8 +106,9 @@ function showLogin(msg) {
   $('lgBack').classList.toggle('stf-hide', !S.publicOn);
   setTimeout(function () { $('lgId').focus(); }, 50);
 }
-function showPublic(org) {
-  S.user = null; S.publicOn = true; S.meta = null; S.dash = null;
+function showPublic(org, boot) {
+  S.user = null; S.publicOn = true; S.meta = boot ? boot.meta : null; S.dash = null;
+  S.preDash = boot ? boot.dash : null; S.dashState = boot ? Object.assign({}, boot.state) : null; S.touched = false;
   $('vLogin').classList.add('stf-hide'); $('vApp').classList.remove('stf-hide');
   $('orgName').textContent = org || '';
   ['userName', 'userRole', 'btnPin', 'btnLogout'].forEach(function (id) { $(id).classList.add('stf-hide'); });
@@ -116,19 +117,36 @@ function showPublic(org) {
   document.querySelector('[data-view="admin"]').classList.add('stf-hide');
   go('dash');
 }
+/** ข้อมูล Dashboard สาธารณะล่าสุดที่จำไว้ในเครื่อง — เปิดครั้งถัดไปแสดงได้ทันทีระหว่างรอข้อมูลใหม่ (ไม่มีหมายเหตุ/ชื่อผู้บันทึก) */
+var BOOT_KEY = 'stf_boot_v1', BOOT_MAX_AGE = 24 * 3600 * 1000;
+function readBoot() {
+  try { var c = JSON.parse(localStorage.getItem(BOOT_KEY) || 'null'); return c && c.t && Date.now() - c.t < BOOT_MAX_AGE && c.d && c.d.meta ? c.d : null; } catch (e) { return null; }
+}
+function saveBoot(d) { try { localStorage.setItem(BOOT_KEY, JSON.stringify({ t: Date.now(), d: d })); } catch (e) { } }
 /** จุดเข้าใช้งาน: มี token ที่ยังใช้ได้ → เข้าแอป; ไม่มี → Dashboard สาธารณะ (ถ้าเปิดไว้) หรือหน้าเข้าสู่ระบบ */
 function enter(msg) {
   var tok = store('stf_tok');
   var fallback = function () {
-    call('publicMeta', {}, true).then(function (m) { showPublic(m.org); })
-      .catch(function () { S.publicOn = false; showLogin(msg); });
+    var cached = readBoot();
+    if (cached) showPublic(cached.meta.org, cached);          // แสดงข้อมูลที่จำไว้ทันที
+    call('publicBoot', {}, !!cached).then(function (b) {
+      saveBoot(b);
+      if (S.token) return;                                    // ระหว่างรอ ผู้ใช้ล็อกอินไปแล้ว
+      if (!cached || !S.touched) showPublic(b.meta.org, b);   // แทนที่ด้วยข้อมูลล่าสุด (ถ้าผู้ใช้ยังไม่ได้เปลี่ยนตัวกรอง)
+    }).catch(function (e) {
+      if (/PUBLIC_OFF|ไม่ได้เปิดให้ดู/.test(e.message)) { try { localStorage.removeItem(BOOT_KEY); } catch (x) { } }
+      if (cached && !/PUBLIC_OFF|ไม่ได้เปิดให้ดู/.test(e.message)) return; // ใช้ข้อมูลที่จำไว้ต่อ
+      // หลังบ้านรุ่นเก่า (ยังไม่มี publicBoot) → วิธีเดิม
+      call('publicMeta', {}, true).then(function (m) { showPublic(m.org); })
+        .catch(function () { S.publicOn = false; showLogin(msg); });
+    });
   };
   if (!tok) { S.token = null; return fallback(); }
   S.token = tok;
-  call('me').then(function (d) { showApp(d.user, d.org); }).catch(function () { clearSession(); fallback(); });
+  call('me').then(function (d) { showApp(d.user, d.org, d.meta); }).catch(function () { clearSession(); fallback(); });
 }
-function showApp(user, org) {
-  S.user = user; S.meta = null;
+function showApp(user, org, meta) {
+  S.user = user; S.meta = meta || null; S.preDash = null; S.dashState = null;
   ['userName', 'userRole', 'btnPin', 'btnLogout'].forEach(function (id) { $(id).classList.remove('stf-hide'); });
   $('btnLogin').classList.add('stf-hide');
   $('vLogin').classList.add('stf-hide'); $('vApp').classList.remove('stf-hide');
@@ -349,7 +367,7 @@ function renderDash() {
       '<button class="btn btn-sm btn-outline" id="dsPdf">' + icon('file-down') + ' PDF</button><button class="btn btn-sm btn-outline" id="dsCsv">' + icon('file-spreadsheet') + ' CSV</button></div></div>' +
       '<div id="dsBody"></div>';
     $('dsSlot').value = st.slotId; $('dsDays').value = String(st.days);
-    var reload = function () { st.date = $('dsDate').value || m.today; st.slotId = $('dsSlot').value; st.days = Number($('dsDays').value); loadDash(); };
+    var reload = function () { S.touched = true; S.preDash = null; st.date = $('dsDate').value || m.today; st.slotId = $('dsSlot').value; st.days = Number($('dsDays').value); loadDash(); };
     $('dsDate').onchange = reload; $('dsSlot').onchange = reload; $('dsDays').onchange = reload;
     $('dsPrint').onclick = function () { window.print(); };
     $('dsPdf').onclick = function () {
@@ -362,7 +380,7 @@ function renderDash() {
     };
     $('dsCsv').onclick = exportDashCsv;
     if (!S.token) $('dsPdf').classList.add('stf-hide');
-    loadDash();
+    if (S.preDash) { S.dash = S.preDash; S.preDash = null; drawDash(); } else loadDash();
   }).catch(function (e) { toast('error', e.message); });
 }
 function loadDash() {
