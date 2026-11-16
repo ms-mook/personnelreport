@@ -1,7 +1,7 @@
 /* ===== style.css: ธีม + เลย์เอาต์ + พิมพ์ + มือถือ (ใช้ร่วมกับ Tailwind/DaisyUI) ===== */
   /* ---------- ธีมแบรนด์ (ทับธีม light ของ daisyUI) ---------- */
   [data-theme="light"] {
-    --color-primary: oklch(48.5% 0.215 264);
+    --color-primary: oklch(52% 0.105 182);   /* เขียวอมฟ้า (teal) ตามโลโก้ BRS */
     --color-primary-content: oklch(98% 0 0);
     --color-secondary: oklch(60% 0.19 40);
     --color-secondary-content: oklch(98% 0 0);
@@ -40,9 +40,10 @@
   .stf-err { color: var(--color-error); font-size: 13px; min-height: 18px; }
   .stf-nav .stf-ns { display: none; }
   .stf-nav .on { background: color-mix(in oklab, var(--color-primary) 12%, transparent); color: var(--color-primary); font-weight: 600; }
+  .stf-nav .btn { font-weight: 500; }
   .stf-loading { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; background: rgba(255,255,255,.55); backdrop-filter: blur(1px); }
 
-  .stf-main { padding: 20px clamp(16px, 2.2vw, 36px) 120px; max-width: none; margin: 0; }
+  .stf-main { padding: 20px clamp(16px, 2.2vw, 36px) 28px; max-width: none; margin: 0; }
   /* ช่องควบคุมด้านบน: กว้างพอสำหรับวันที่/ช่วงเวลา ไม่ให้ตัวหนังสือซ้อนไอคอน */
   .stf-ctrl .stf-field { flex: none; }
   .stf-field input[type="date"].input { width: 11.5rem; min-width: 11.5rem; padding-inline: .75rem .5rem; }
@@ -76,7 +77,7 @@
   /* หน้ากรอก: เต็มจอ — จอกว้างมากแบ่งห้องเป็น 2 คอลัมน์ */
   #enBody { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; align-items: start; }
   #enBody > .alert { grid-column: 1 / -1; margin-bottom: 0; }
-  @media (min-width: 1680px) { #enBody { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 2200px) { #enBody { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   .stf-room-h .stf-sub { font-weight: 400; }
   .stf-pt, .stf-pt-head { display: grid; grid-template-columns: minmax(180px, 1fr) 96px 96px 130px minmax(160px, 1fr); gap: 10px; align-items: center; }
   .stf-pt { padding: 10px 6px; border-top: 1px solid var(--color-base-200); border-radius: 8px; transition: background-color .25s ease; }
@@ -155,7 +156,7 @@
     .stf-nav .btn { flex: 1 1 0; padding: 0 6px; gap: 5px; }
     .stf-nav .stf-nl { display: none; } .stf-nav .stf-ns { display: inline; }
     .stf-sub.hide-sm { display: none; }
-    .stf-main { padding: 12px 12px 150px; }
+    .stf-main { padding: 12px 12px 24px; }
     .stf-pt-head { display: none; }
     .stf-pt { grid-template-columns: 1fr 1fr 1fr; gap: 8px; padding: 12px 8px; border: 1px solid var(--color-base-300); margin-bottom: 8px; }
     .stf-pt:first-of-type { border-top: 1px solid var(--color-base-300); }
@@ -241,7 +242,8 @@
 .stf-lback svg { width: 17px; height: 17px; }
 .stf-auth-help { display: flex; gap: 6px; align-items: flex-start; justify-content: center; font-size: 12.5px; color: var(--stf-muted); margin-top: 16px; text-align: center; }
 .stf-auth-help svg { width: 14px; height: 14px; flex: none; margin-top: 2px; }
-.stf-auth-foot { position: relative; z-index: 3; font-size: 11.5px; color: var(--stf-muted); text-align: center; }
+.stf-auth-foot p + p { margin-top: 2px; }
+.stf-auth-foot { position: relative; z-index: 3; line-height: 1.5; font-size: 11.5px; color: var(--stf-muted); text-align: center; }
 
 /* เส้นชีพจร: วางพาดข้ามสองฝั่ง อยู่หลังการ์ดฟอร์ม */
 .stf-ecg { position: absolute; left: 0; right: 0; top: 64%; height: 110px; width: 100%; z-index: 1; pointer-events: none; overflow: visible; }
@@ -281,4 +283,121 @@
   .stf-hero-logo { width: 130px; }
   .stf-hero-copy h1 { font-size: 28px; }
   .stf-ecg { top: 196px; }
+}
+
+/* =================== หน้าภายใน: ชุดเดียวกับหน้า login =================== */
+:root { --stf-sb: 252px; --stf-teal-grad: radial-gradient(120% 140% at 0% 0%, #1f8f86 0%, transparent 55%), radial-gradient(90% 120% at 100% 100%, rgba(225,29,72,.42) 0%, transparent 60%), linear-gradient(150deg, #083437 0%, #0d5552 52%, #0f3f4a 100%);
+  --stf-ecg-line: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 60' preserveAspectRatio='none'%3E%3Cpath d='M0 34H70l8-12 9 28 10-44 10 42 7-14H230l8-12 9 28 10-44 10 42 7-14H400' fill='none' stroke='white' stroke-opacity='.22' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+
+/* ---------- แถบบน (มือถือ/แท็บเล็ต) ---------- */
+.stf-top { background: var(--stf-teal-grad) !important; color: #fff; border-bottom: 0 !important; box-shadow: 0 6px 20px -10px rgba(8,52,55,.6) !important; }
+.stf-top .font-bold { color: #fff; }
+.stf-top .stf-sub { color: rgba(255,255,255,.72); }
+.stf-top .stf-nav .btn { color: rgba(255,255,255,.82); background: transparent; border: 0; }
+.stf-top .stf-nav .btn:hover { background: rgba(255,255,255,.12); color: #fff; }
+.stf-top .stf-nav .on { background: rgba(255,255,255,.18) !important; color: #fff !important; box-shadow: inset 0 0 0 1px rgba(255,255,255,.22); }
+.stf-top .stf-user, .stf-top .stf-user .btn-ghost { color: rgba(255,255,255,.9); }
+.stf-top .stf-user .btn-ghost:hover { background: rgba(255,255,255,.14); }
+.stf-top #userRole { background: rgba(255,255,255,.16); color: #fff; border: 0; }
+.stf-top #btnLogin { background: #fff; color: #0f766e; border: 0; }
+.stf-hlogo { box-shadow: 0 4px 12px rgba(0,0,0,.25); }
+
+/* ---------- แถบเมนูด้านข้าง (PC ≥ 1024px) ---------- */
+@media (min-width: 1024px) {
+  #vApp { padding-left: var(--stf-sb); }
+  .stf-top { position: fixed !important; top: 0; left: 0; bottom: 0; width: var(--stf-sb); min-height: 0 !important; z-index: 35;
+    flex-direction: column !important; flex-wrap: nowrap !important; align-items: stretch !important; justify-content: flex-start !important;
+    padding: 22px 14px 18px !important; gap: 22px !important; overflow-y: auto; }
+  .stf-top::after { content: ""; position: absolute; left: 0; right: 0; bottom: 120px; height: 60px; background: var(--stf-ecg-line) center / 100% 100% no-repeat; pointer-events: none; }
+  .stf-top > div:first-child { padding: 4px 8px 18px; border-bottom: 1px solid rgba(255,255,255,.14); }
+  .stf-top .stf-hlogo { width: 46px; height: 46px; border-radius: 13px; }
+  .stf-top .stf-sub.hide-sm { display: block; white-space: normal; font-size: 11.5px; line-height: 1.45; margin-top: 2px; }
+  .stf-top .stf-nav { flex-direction: column; width: 100% !important; margin: 0 !important; order: 0 !important; gap: 4px; overflow: visible; }
+  .stf-top .stf-nav::before { content: "เมนู"; font-size: 11px; letter-spacing: 1px; color: rgba(255,255,255,.5); padding: 0 12px 4px; }
+  .stf-top .stf-nav .btn { justify-content: flex-start; height: 46px; padding: 0 14px; gap: 12px; border-radius: 12px; font-size: 15px; position: relative; }
+  .stf-top .stf-nav .btn svg { width: 19px; height: 19px; }
+  .stf-top .stf-nav .on::before { content: ""; position: absolute; left: -14px; top: 10px; bottom: 10px; width: 4px; border-radius: 0 4px 4px 0; background: #fda4af; }
+  .stf-top .stf-user { margin: auto 0 0 0 !important; position: relative; z-index: 1; display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 6px 4px;
+    padding: 12px; border-radius: 14px; background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.14); }
+  .stf-top #userName { grid-column: 1 / -1; display: block !important; font-size: 14px; font-weight: 600; color: #fff; white-space: normal; }
+  .stf-top #userRole { justify-self: start; }
+  .stf-top #btnLogin { grid-column: 1 / -1; width: 100%; height: 40px; }
+  .stf-dock { left: var(--stf-sb); }
+}
+
+/* ---------- banner หัวหน้า (ทุกหน้า) ---------- */
+.stf-h { position: relative; overflow: hidden; align-items: center !important; padding: 22px clamp(18px, 2vw, 28px); border-radius: 20px; color: #fff;
+  background: var(--stf-teal-grad); box-shadow: 0 18px 40px -22px rgba(8,52,55,.75); margin-bottom: 18px !important; }
+.stf-h::after { content: ""; position: absolute; left: 0; right: 0; bottom: 4px; height: 46px; background: var(--stf-ecg-line) center / 100% 100% no-repeat; opacity: .9; pointer-events: none; }
+.stf-h > * { position: relative; z-index: 1; }
+.stf-h h1 { display: flex; align-items: center; gap: 12px; font-size: clamp(19px, 1.6vw, 24px); color: #fff; }
+.stf-h .stf-sub { color: rgba(255,255,255,.78); font-size: 13px; margin-top: 4px; }
+.stf-h .stf-sub a { color: #99f6e4; }
+.stf-hico { flex: none; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 12px; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.22); }
+.stf-hico svg { width: 21px; height: 21px; color: #fff; }
+.stf-h .stf-field { color: rgba(255,255,255,.8); }
+.stf-h .stf-field > .input, .stf-h .stf-field > .select { background: #fff; border-color: transparent; color: var(--color-base-content); }
+.stf-h .btn-outline { background: rgba(255,255,255,.14); color: #fff; border-color: rgba(255,255,255,.32); }
+.stf-h .btn-outline:hover { background: rgba(255,255,255,.26); color: #fff; border-color: rgba(255,255,255,.5); }
+/* หน้าผู้ดูแล: โทนชมพู-ม่วงให้เข้ากับพื้นชมพู */
+body.stf-admin-bg .stf-h { background: radial-gradient(120% 140% at 0% 0%, #db2777 0%, transparent 55%), radial-gradient(90% 120% at 100% 100%, rgba(124,58,237,.6) 0%, transparent 60%), linear-gradient(150deg, #5b1338 0%, #86204f 50%, #4c1d6e 100%);
+  box-shadow: 0 18px 40px -22px rgba(91,19,56,.75); }
+
+/* ---------- การ์ด ---------- */
+.stf-card { border-radius: 18px !important; }
+.stf-card h2 { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; }
+.stf-kpi { border-radius: 18px !important; }
+.stf-kpi .m-icon { width: 40px !important; height: 40px !important; border-radius: 12px !important; }
+.stf-kpi .m-icon svg { width: 20px; height: 20px; }
+
+/* ---------- หน้ากรอก: การ์ดห้อง + ปุ่ม −/+ ---------- */
+.stf-room { border-left: 4px solid color-mix(in oklab, var(--color-primary) 55%, transparent) !important; transition: border-color .3s ease; }
+.stf-room.has-short { border-left-color: var(--color-error) !important; }
+.stf-room-h > span:first-child { display: inline-flex; align-items: center; gap: 8px; font-size: 16px; }
+.stf-room-h > span:first-child svg { width: 18px !important; height: 18px !important; margin: 0 !important; padding: 6px; box-sizing: content-box; border-radius: 9px; background: color-mix(in oklab, var(--color-primary) 12%, transparent); }
+.stf-room-h [data-room-sum] { display: inline-flex; flex-wrap: wrap; gap: 6px; margin-left: 4px; }
+.stf-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; padding: 2px 9px; border-radius: 999px; background: var(--color-base-200); color: var(--stf-muted); }
+.stf-pill b { color: var(--color-base-content); font-weight: 700; }
+.stf-pill.bad { background: color-mix(in oklab, var(--color-error) 12%, transparent); color: var(--color-error); }
+.stf-pill.bad b { color: var(--color-error); }
+.stf-pill.ok { background: color-mix(in oklab, var(--color-success) 12%, transparent); color: var(--color-success); }
+.stf-pt, .stf-pt-head { grid-template-columns: minmax(170px, 1fr) 84px 148px 120px minmax(150px, 1fr); }
+.stf-pt input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+.stf-pt input[type=number]::-webkit-outer-spin-button, .stf-pt input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.stf-step { display: flex; align-items: center; gap: 4px; }
+.stf-step .input { min-width: 0; flex: 1; padding: 0 2px; }
+.stf-stp { flex: none; display: grid; place-items: center; width: 34px; height: 38px; border-radius: 10px; border: 1px solid var(--color-base-300); background: var(--color-base-100);
+  color: var(--color-primary); cursor: pointer; transition: background-color .15s, transform .1s; touch-action: manipulation; }
+.stf-stp svg { width: 16px; height: 16px; }
+.stf-stp:hover:not(:disabled) { background: color-mix(in oklab, var(--color-primary) 10%, var(--color-base-100)); }
+.stf-stp:active:not(:disabled) { transform: scale(.92); }
+.stf-stp:disabled { opacity: .35; cursor: not-allowed; }
+.stf-dock { backdrop-filter: blur(10px); background: color-mix(in oklab, var(--color-base-100) 88%, transparent); }
+
+/* ---------- แท็บผู้ดูแล: แบบเม็ดยา ---------- */
+.stf-tabs { display: flex; gap: 4px; padding: 6px; border-radius: 16px; background: var(--color-base-100); border: 1px solid var(--color-base-300) !important; box-shadow: 0 2px 8px rgba(16,24,40,.05); margin-bottom: 16px; }
+.stf-tabs .tab { height: 40px; padding: 0 14px; border-radius: 11px; border: 0 !important; font-weight: 500; color: var(--stf-muted); }
+.stf-tabs .tab::before, .stf-tabs .tab::after { display: none !important; }
+.stf-tabs .tab:hover { background: var(--color-base-200); color: var(--color-base-content); }
+.stf-tabs .tab.tab-active { background: linear-gradient(135deg, #86204f, #db2777); color: #fff !important; box-shadow: 0 6px 14px -6px rgba(219,39,119,.6); }
+
+/* ---------- ส่วนท้าย ---------- */
+.stf-foot { text-align: center; padding: 6px 16px 22px; font-size: 12px; color: var(--stf-muted); }
+#vApp:has(.stf-dock) .stf-foot { padding-bottom: 110px; }
+@media (max-width: 720px) { #vApp:has(.stf-dock) .stf-foot { padding-bottom: 170px; } }
+.stf-foot p:first-child { font-weight: 500; color: color-mix(in oklab, var(--color-base-content) 70%, transparent); }
+.stf-foot p + p { margin-top: 2px; }
+.stf-foot { border-top: 1px solid color-mix(in oklab, var(--color-base-content) 10%, transparent); margin: 8px clamp(16px, 2.2vw, 36px) 0; padding-top: 16px; }
+
+@media (max-width: 720px) {
+  .stf-h { border-radius: 16px; padding: 16px; }
+  .stf-hico { width: 36px; height: 36px; }
+  .stf-pt { grid-template-columns: 1fr 1.3fr 1fr; }
+  .stf-stp { width: 40px; height: 42px; }
+}
+@media print {
+  #vApp { padding-left: 0 !important; }
+  .stf-h { background: none !important; color: #000; box-shadow: none; padding: 0; }
+  .stf-h::after, .stf-hico, .stf-foot { display: none !important; }
+  .stf-h h1, .stf-h .stf-sub { color: #000; }
 }

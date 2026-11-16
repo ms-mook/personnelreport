@@ -11,7 +11,6 @@
 
   <!-- ===== ไลบรารีจาก CDN (jsDelivr ทั้งหมด) ===== -->
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-  <link rel="preload" href="/img/brs-logo.webp" as="image" type="image/webp">
   <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css">
   <!-- Tailwind สร้างไว้ล่วงหน้า (npm run css) — ไม่ต้องแปลงในเบราว์เซอร์ -->
   <link href="/css/tailwind.css" rel="stylesheet">
@@ -80,7 +79,7 @@
         <button type="button" class="btn btn-ghost stf-lback stf-hide" id="lgBack"><i data-lucide="layout-dashboard"></i> ดู Dashboard โดยไม่ต้องเข้าสู่ระบบ</button>
         <p class="stf-auth-help"><i data-lucide="circle-help"></i> ลืม PIN หรือเข้าไม่ได้ ติดต่อผู้ดูแลระบบให้ตั้ง PIN ใหม่</p>
       </div>
-      <footer class="stf-auth-foot">© <span id="lgYear">2569</span> BRS Staffing Report · หน่วยเจาะเลือดเก็บสิ่งส่งตรวจและ POCT</footer>
+      <footer class="stf-auth-foot"><p>พัฒนาโดย ทนพญ. มุกดารัตน์ สุพัฒน์</p><p>งานห้องปฏิบัติการเวชศาสตร์ชันสูตร โรงพยาบาลศรีนครินทร์</p></footer>
     </section>
 
     <!-- เส้นชีพจร (ECG) วิ่งข้ามทั้งสองฝั่ง -->
@@ -120,6 +119,10 @@
       </div>
     </header>
     <main id="main" class="stf-main"></main>
+    <footer class="stf-foot">
+      <p>พัฒนาโดย ทนพญ. มุกดารัตน์ สุพัฒน์</p>
+      <p>งานห้องปฏิบัติการเวชศาสตร์ชันสูตร โรงพยาบาลศรีนครินทร์</p>
+    </footer>
   </div>
 
   <div id="toasts" class="toast toast-top toast-end z-[60] mt-14"></div>

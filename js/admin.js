@@ -5,7 +5,7 @@ var AD_TABS = [
   ['data', 'ข้อมูลรายวัน', 'database'], ['import', 'นำเข้าข้อมูลเดิม', 'upload'], ['settings', 'ตั้งค่า', 'settings']
 ];
 function renderAdmin() {
-  $('main').innerHTML = '<div class="flex flex-wrap items-end gap-3 mb-3.5 stf-h"><div><h1>ผู้ดูแลระบบ</h1><div class="stf-sub" id="adStats"></div></div></div>' +
+  $('main').innerHTML = '<div class="flex flex-wrap items-end gap-3 mb-3.5 stf-h"><div><h1><span class="stf-hico">' + icon('shield-check', '') + '</span>ผู้ดูแลระบบ</h1><div class="stf-sub" id="adStats"></div></div></div>' +
     '<div role="tablist" class="tabs tabs-border stf-tabs" id="adTabs">' + AD_TABS.map(function (t) { return '<button role="tab" class="tab" data-tab="' + t[0] + '">' + icon(t[2], 'size-4 mr-1.5') + t[1] + '</button>'; }).join('') + '</div><div id="adBody"></div>';
   Array.prototype.forEach.call(document.querySelectorAll('#adTabs button'), function (b) { b.onclick = function () { AD.tab = b.getAttribute('data-tab'); drawAdmin(); }; });
   loadAdmin();

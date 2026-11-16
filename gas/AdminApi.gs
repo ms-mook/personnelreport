@@ -33,6 +33,7 @@ function nextId_(prefix, ids) {
 
 // ---------- จุดปฏิบัติงาน ----------
 function savePoint_(user, p) {
+  bumpPub_();
   const room = String(p.room || '').trim(), name = String(p.name || '').trim();
   if (!room || !name) throw new Error('กรุณากรอกชื่อห้องและจุดปฏิบัติงาน');
   const plan = Number(p.defPlan);
@@ -56,6 +57,7 @@ function savePoint_(user, p) {
 
 // ---------- ช่วงเวลา ----------
 function saveSlot_(user, p) {
+  bumpPub_();
   const name = String(p.name || '').trim();
   if (!name) throw new Error('กรุณากรอกชื่อช่วงเวลา เช่น 08.30–12.30 น.');
   const s = sh_(SH_().SLOTS);
@@ -134,6 +136,7 @@ function deleteRecipient_(user, p) {
 
 // ---------- ตั้งค่า ----------
 function saveSettings_(user, p) {
+  bumpPub_();
   const allowed = DEFAULT_SETTINGS_().map(d => d[0]);
   const vals = p.values || {};
   const h = Number(vals.REPORT_HOUR), m = Number(vals.REPORT_MINUTE), back = Number(vals.EDIT_BACK_DAYS);

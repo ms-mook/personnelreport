@@ -252,7 +252,7 @@ function login_(p) {
   cache.put('tok_' + token, JSON.stringify(user), SESSION_SEC);
   sh_(SH_().USERS).getRange(u.row, 8).setValue(new Date());
   log_(user.id, 'login', '');
-  return { token: token, user: user, mustChange: bool_(u.r[6]), appName: APP_NAME, org: settings_().ORG_NAME, meta: getMeta_() };
+  return Object.assign({ token: token, user: user, mustChange: bool_(u.r[6]), appName: APP_NAME, org: settings_().ORG_NAME }, initialView_(user));
 }
 function session_(token) {
   if (!token || typeof token !== 'string') return null;
@@ -277,7 +277,7 @@ function changePin_(user, p) {
 function ROUTES_() {
   const ANY = ['viewer', 'staff', 'admin'], ENTRY = ['staff', 'admin'], ADMIN = ['admin'];
   return {
-    me: [ANY, (u) => ({ user: u, appName: APP_NAME, org: settings_().ORG_NAME, today: today_(), meta: getMeta_() })],
+    me: [ANY, (u) => Object.assign({ user: u, appName: APP_NAME, org: settings_().ORG_NAME, today: today_() }, initialView_(u))],
     logout: [ANY, (u, p, token) => { CacheService.getScriptCache().remove('tok_' + token); return true; }],
     changePin: [ANY, changePin_],
     getMeta: [ANY, () => getMeta_()],
@@ -321,6 +321,30 @@ function api(action, token, payload) {
   }
 }
 
+/** ข้อมูลหน้าแรกหลังล็อกอิน (ส่งมาพร้อม login/me ในรอบเดียว): เจ้าหน้าที่/ผู้ดูแล → ฟอร์มกรอกวันนี้ ; ผู้บริหาร → Dashboard */
+function initialView_(user) {
+  const meta = getMeta_();
+  const out = { meta: meta };
+  try {
+    if (user.role === 'staff' || user.role === 'admin') out.form = getEntryForm_(user, { date: meta.today, slotId: meta.slots[0] && meta.slots[0].id });
+    else {
+      out.state = { date: meta.today, slotId: meta.slots.length > 1 ? 'ALL' : (meta.slots[0] && meta.slots[0].id) || '', days: 30 };
+      out.dash = getDashboard_(out.state);
+    }
+  } catch (e) { Logger.log('initialView_: ' + e); }
+  return out;
+}
+
+/** อุ่นเครื่อง: เติมแคช Dashboard สาธารณะไว้ล่วงหน้า (ตั้งเวลาด้วย installWarmup) */
+function warmUp() { try { publicApi_('publicBoot', {}); } catch (e) { Logger.log('warmUp: ' + e); } }
+/** รันครั้งเดียวจากตัวแก้ไข: ตั้งเวลาให้ warmUp ทำงานทุก 10 นาที — ให้เปิดหน้าเว็บครั้งแรกเร็วขึ้น */
+function installWarmup() {
+  ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() === 'warmUp').forEach(t => ScriptApp.deleteTrigger(t));
+  ScriptApp.newTrigger('warmUp').timeBased().everyMinutes(10).create();
+  warmUp();
+  Logger.log('✅ ตั้งเวลาอุ่นเครื่องทุก 10 นาทีแล้ว');
+}
+
 /** เลขเวอร์ชันแคช Dashboard สาธารณะ — เปลี่ยนทุกครั้งที่ข้อมูลถูกบันทึก/ลบ/นำเข้า เพื่อให้เห็นข้อมูลล่าสุดทันที */
 function pubVer_() { return CacheService.getScriptCache().get('pubver') || '0'; }
 function bumpPub_() { try { CacheService.getScriptCache().put('pubver', String(Date.now()), 21600); } catch (e) { } }
@@ -345,7 +369,7 @@ function publicApi_(action, p) {
   const d = getDashboard_({ date: date, slotId: p.slotId, days: p.days });
   d.rows = d.rows.map(r => Object.assign({}, r, { note: '', by: '', at: '' }));
   d.public = true;
-  try { cache.put(key, JSON.stringify(d), 30); } catch (e) { /* ใหญ่เกินแคช ข้ามได้ */ }
+  try { cache.put(key, JSON.stringify(d), 21600); } catch (e) { /* ใหญ่เกินแคช ข้ามได้ */ } // แคช 6 ชม. — ล้างอัตโนมัติเมื่อมีการบันทึก (bumpPub_)
   return { ok: true, data: d };
 }
 

@@ -35,15 +35,17 @@ var API_URL = '/api/gas';
 function call(action, payload, quiet) {
   if (!S.token && PUBLIC_MAP[action]) action = PUBLIC_MAP[action]; // ยังไม่ล็อกอิน → ใช้เส้นทางสาธารณะ (อ่านอย่างเดียว)
   if (!quiet) setLoading(true);
+  var ep = S.epoch || 0;
   return fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: action, token: S.token, payload: payload || {} }) })
     .then(function (res) { return res.json().catch(function () { throw new Error('เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง (HTTP ' + res.status + ')'); }); },
           function (e) { throw new Error('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจอินเทอร์เน็ตแล้วลองใหม่'); })
     .then(function (r) {
       if (!quiet) setLoading(false);
+      if (ep !== (S.epoch || 0) && action !== 'logout') return new Promise(function () { }); // คำตอบของเซสชันก่อนหน้า (เช่น ก่อนกดออก) — ทิ้ง
       if (r && r.ok) return r.data;
       if (r && r.code === 'AUTH' && action !== 'login' && action !== 'me') { clearSession(); showLogin(r.message); }
       throw new Error(r && r.message ? r.message : 'ไม่มีการตอบกลับจากเซิร์ฟเวอร์');
-    }, function (e) { if (!quiet) setLoading(false); throw e; });
+    }, function (e) { if (!quiet) setLoading(false); if (ep !== (S.epoch || 0)) return new Promise(function () { }); throw e; });
 }
 function toast(type, msg, ms) {
   var map = { success: ['alert-success', 'circle-check'], error: ['alert-error', 'circle-alert'], info: ['alert-info', 'info'] };
@@ -56,6 +58,7 @@ function toast(type, msg, ms) {
   $('toasts').appendChild(t);
   setTimeout(function () { t.classList.add('m-out'); setTimeout(function () { t.remove(); }, 260); }, ms || (type === 'error' ? 6000 : 3500));
 }
+function closeModals() { $('modalRoot').innerHTML = ''; }
 /** modal ทั่วไป: opt = {title, html, okText, cancelText, danger, noCancel, onOk(box) → false เพื่อค้างไว้ / Promise} */
 function modal(opt) {
   return new Promise(function (resolve) {
@@ -106,11 +109,11 @@ function showLogin(msg) {
   $('lgId').parentNode.classList.remove('bad'); $('lgPin').parentNode.classList.remove('bad');
   window.scrollTo(0, 0);
   $('lgBack').classList.toggle('stf-hide', !S.publicOn);
-  setTimeout(function () { $('lgId').focus(); }, 50);
+  setTimeout(function () { var a = document.activeElement; if (!a || a === document.body || !$('vLogin').contains(a)) $('lgId').focus(); }, 50); // ไม่แย่งเคอร์เซอร์ถ้าผู้ใช้เริ่มพิมพ์แล้ว
 }
 function showPublic(org, boot) {
   S.user = null; S.publicOn = true; S.meta = boot ? boot.meta : null; S.dash = null;
-  S.preDash = boot ? boot.dash : null; S.dashState = boot ? Object.assign({}, boot.state) : null; S.touched = false;
+  S.preDash = boot && boot.dash ? boot.dash : null; S.dashState = boot && boot.state ? Object.assign({}, boot.state) : null; S.touched = false;
   $('vLogin').classList.add('stf-hide'); $('vApp').classList.remove('stf-hide');
   $('orgName').textContent = org || '';
   ['userName', 'userRole', 'btnPin', 'btnLogout'].forEach(function (id) { $(id).classList.add('stf-hide'); });
@@ -133,7 +136,8 @@ function enter(msg) {
     if (cached) showPublic(cached.meta.org, cached);          // แสดงข้อมูลที่จำไว้ทันที
     call('publicBoot', {}, !!cached).then(function (b) {
       saveBoot(b);
-      if (S.token) return;                                    // ระหว่างรอ ผู้ใช้ล็อกอินไปแล้ว
+      if (S.token || !$('vLogin').classList.contains('stf-hide')) return; // ระหว่างรอ ผู้ใช้เปิดหน้าเข้าสู่ระบบ/ล็อกอินไปแล้ว — อย่าสลับหน้าทับ
+      if (cached && S.view !== 'dash') return;                // ผู้ใช้ไปหน้าอื่นแล้ว
       if (!cached || !S.touched) showPublic(b.meta.org, b);   // แทนที่ด้วยข้อมูลล่าสุด (ถ้าผู้ใช้ยังไม่ได้เปลี่ยนตัวกรอง)
     }).catch(function (e) {
       if (/PUBLIC_OFF|ไม่ได้เปิดให้ดู/.test(e.message)) { try { localStorage.removeItem(BOOT_KEY); } catch (x) { } }
@@ -145,10 +149,12 @@ function enter(msg) {
   };
   if (!tok) { S.token = null; return fallback(); }
   S.token = tok;
-  call('me').then(function (d) { showApp(d.user, d.org, d.meta); }).catch(function () { clearSession(); fallback(); });
+  call('me').then(function (d) { showApp(d.user, d.org, d.meta, d); }).catch(function () { clearSession(); fallback(); });
 }
-function showApp(user, org, meta) {
-  S.user = user; S.meta = meta || null; S.preDash = null; S.dashState = null;
+function showApp(user, org, meta, pre) {
+  pre = pre || {};
+  S.user = user; S.meta = meta || null; S.form = null;
+  S.preForm = pre.form || null; S.preDash = pre.dash || null; S.dashState = pre.state ? Object.assign({}, pre.state) : null;
   ['userName', 'userRole', 'btnPin', 'btnLogout'].forEach(function (id) { $(id).classList.remove('stf-hide'); });
   $('btnLogin').classList.add('stf-hide');
   $('vLogin').classList.add('stf-hide'); $('vApp').classList.remove('stf-hide');
@@ -177,8 +183,9 @@ $('loginForm').addEventListener('submit', function (e) {
   loginBusy(true);
   call('login', { staffId: id, pin: pin }, true).then(function (d) {
     S.token = d.token; store('stf_tok', d.token);
-    if (d.mustChange) return changePinDialog(true).then(function () { showApp(d.user, d.org, d.meta); });
-    showApp(d.user, d.org, d.meta);
+    S.epoch = (S.epoch || 0) + 1;
+    if (d.mustChange) { loginBusy(false); return changePinDialog(true).then(function () { showApp(d.user, d.org, d.meta, d); }); }
+    showApp(d.user, d.org, d.meta, d);
   }).catch(function (err) { loginFieldErr('lgPin', err.message); $('lgPin').select(); })
     .then(function () { loginBusy(false); });
 });
@@ -193,7 +200,6 @@ $('lgEye').addEventListener('click', function () {
   $('lgPin').addEventListener(ev, function (e) { if (e.getModifierState) $('lgCaps').classList.toggle('stf-hide', !e.getModifierState('CapsLock')); });
 });
 $('lgPin').addEventListener('input', function () { this.value = this.value.replace(/\D/g, '').slice(0, 6); });
-$('lgYear').textContent = String(new Date().getFullYear() + 543);
 function changePinDialog(forced) {
   return modal({
     title: forced ? 'ตั้ง PIN ใหม่ก่อนใช้งาน' : 'เปลี่ยน PIN', noCancel: forced, okText: 'บันทึก PIN',
@@ -212,13 +218,17 @@ function changePinDialog(forced) {
 }
 $('btnPin').onclick = function () { changePinDialog(false); };
 $('btnLogout').onclick = function () {
-  // ออกทันที ไม่รอเซิร์ฟเวอร์ (ถ้าเซิร์ฟเวอร์ช้า/ค้าง ปุ่มต้องไม่ดูเหมือนกดไม่ติด) แล้วแจ้งเซิร์ฟเวอร์เลิกใช้ token ทีหลัง
-  var tok = S.token;
-  S.form = null; S.view = null;               // ทิ้งข้อมูลที่ยังไม่บันทึก เพื่อไม่ให้กล่องยืนยัน "ออกจากหน้านี้" มาขวาง
-  clearSession();
+  // ออกทันที: เปลี่ยนหน้าจอเดี๋ยวนั้น ไม่รอ Apps Script และทิ้งคำตอบที่ค้างของเซสชันเดิม
+  var tok = S.token, meta = S.meta, org = $('orgName').textContent;
+  S.epoch = (S.epoch || 0) + 1; S.loading = 0; $('loading').classList.add('stf-hide');
+  S.form = null; S.view = null; S.preForm = null; S.dash = null; S.dashState = null;
+  clearSession(); closeModals();
   if (tok) { try { fetch(API_URL, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'logout', token: tok, payload: {} }) }).catch(function () { }); } catch (e) { } }
-  enter();                                       // กลับ Dashboard สาธารณะ (ถ้าปิดโหมดสาธารณะไว้ จะไปหน้าเข้าสู่ระบบแทน)
   toast('info', 'ออกจากระบบแล้ว', 2500);
+  if (S.publicOn === false) return showLogin('ออกจากระบบแล้ว');
+  var cached = readBoot();
+  if (cached) return showPublic(cached.meta.org, cached);
+  showPublic(org, meta ? { meta: meta } : null); // เปลี่ยนหน้าทันที — Dashboard โหลดต่อเองในหน้า (มีโครงรอโหลด)
 };
 $('btnLogin').onclick = function () { showLogin(); };
 $('lgBack').onclick = function () { enter(); };
@@ -247,7 +257,7 @@ function renderEntry(date, slotId) {
     date = date || (S.form && S.form.date) || m.today;
     slotId = slotId || (S.form && S.form.slotId) || (m.slots[0] && m.slots[0].id);
     $('main').innerHTML =
-      '<div class="flex flex-wrap items-end gap-3 mb-3.5 stf-h"><div><h1>กรอกอัตรากำลัง</h1><div class="stf-sub" id="enDateLong"></div></div>' +
+      '<div class="flex flex-wrap items-end gap-3 mb-3.5 stf-h"><div><h1><span class="stf-hico">' + icon('clipboard-pen-line', '') + '</span>กรอกอัตรากำลัง</h1><div class="stf-sub" id="enDateLong"></div></div>' +
       '<div class="flex flex-wrap items-end gap-2 md:ml-auto w-full md:w-auto stf-ctrl"><label class="stf-field">วันที่<input type="date" id="enDate" class="input" max="' + m.today + '" value="' + esc(date) + '"></label>' +
       '<label class="stf-field">ช่วงเวลา<select id="enSlot" class="select">' + m.slots.map(function (s) { return '<option value="' + esc(s.id) + '"' + (s.id === slotId ? ' selected' : '') + '>' + esc(s.name) + '</option>'; }).join('') + '</select></label></div></div>' +
       '<div id="enBody"></div>' +
@@ -269,7 +279,9 @@ function loadEntry(date, slotId) {
   if (S.form && (S.form.date !== date || S.form.slotId !== slotId) && isDirty() && !confirm('มีข้อมูลที่ยังไม่บันทึก ต้องการเปลี่ยนวัน/ช่วงเวลาหรือไม่?')) {
     $('enDate').value = S.form.date; $('enSlot').value = S.form.slotId; return;
   }
-  call('getEntryForm', { date: date, slotId: slotId }).then(function (f) { S.form = f; drawEntry(); })
+  if (S.preForm && S.preForm.date === date && S.preForm.slotId === slotId) { S.form = S.preForm; S.preForm = null; return drawEntry(); }
+  S.preForm = null;
+  call('getEntryForm', { date: date, slotId: slotId }).then(function (f) { if (S.view !== 'entry') return; S.form = f; drawEntry(); })
     .catch(function (e) { toast('error', e.message); });
 }
 function ptRow(r, editable) {
@@ -277,7 +289,9 @@ function ptRow(r, editable) {
   return '<div class="stf-pt" data-pid="' + esc(r.pointId) + '" data-type="' + esc(r.type) + '">' +
     '<div class="nm">' + esc(r.name) + (r.saved ? '<small>บันทึกล่าสุด ' + esc(thTs(r.at)) + ' · ' + esc(r.by) + '</small>' : '<small>ยังไม่บันทึก</small>') + '</div>' +
     '<div><span class="lbl">ตามแผน</span><input class="input plan" type="number" inputmode="numeric" min="0" max="200" step="1" value="' + esc(r.plan) + '" aria-label="อัตราตามแผน ' + esc(r.name) + '"' + dis + '></div>' +
-    '<div><span class="lbl">มาปฏิบัติงาน</span><input class="input act" type="number" inputmode="numeric" min="0" max="200" step="1" value="' + esc(r.actual) + '" placeholder="–" aria-label="อัตราปัจจุบัน ' + esc(r.name) + '"' + dis + '></div>' +
+    '<div><span class="lbl">มาปฏิบัติงาน</span><div class="stf-step"><button type="button" class="stf-stp" data-d="-1" aria-label="ลด"' + dis + '>' + icon('minus', '') + '</button>' +
+    '<input class="input act" type="number" inputmode="numeric" min="0" max="200" step="1" value="' + esc(r.actual) + '" placeholder="–" aria-label="อัตราปัจจุบัน ' + esc(r.name) + '"' + dis + '>' +
+    '<button type="button" class="stf-stp" data-d="1" aria-label="เพิ่ม"' + dis + '>' + icon('plus', '') + '</button></div></div>' +
     '<div class="diff"></div>' +
     '<div class="note-w"><span class="lbl">หมายเหตุ</span><input class="input note" maxlength="300" placeholder="เช่น ลาป่วย 1, ลาพักร้อน 1" value="' + esc(r.note) + '"' + dis + '></div></div>';
 }
@@ -306,6 +320,13 @@ function drawEntry() {
   animateIn($('enBody'));
   $('enSave').disabled = !f.editable;
   Array.prototype.forEach.call(document.querySelectorAll('.stf-pt input'), function (el) { el.addEventListener('input', recalc); });
+  $('enBody').onclick = function (e) {
+    var b = e.target.closest('.stf-stp'); if (!b || b.disabled) return;
+    var row = b.closest('.stf-pt'), inp = row.querySelector('.act'), plan = row.querySelector('.plan');
+    var cur = inp.value === '' ? (Number(plan.value) || 0) + (Number(b.getAttribute('data-d')) > 0 ? -1 : 1) : Number(inp.value);
+    inp.value = String(Math.max(0, Math.min(200, cur + Number(b.getAttribute('data-d')))));
+    inp.dispatchEvent(new Event('input', { bubbles: true }));
+  };
   recalc();
 }
 function readRows() {
@@ -331,7 +352,11 @@ function recalc() {
   });
   Object.keys(roomSum).forEach(function (k) {
     var el = document.querySelector('[data-room-sum="' + k.replace(/"/g, '\\"') + '"]');
-    if (el) { var d = roomSum[k].a - roomSum[k].p; el.textContent = '· แผน ' + roomSum[k].p + ' มา ' + roomSum[k].a + (d < 0 ? ' · ขาด ' + (-d) : ''); }
+    if (el) {
+      var d = roomSum[k].a - roomSum[k].p;
+      el.innerHTML = '<span class="stf-pill">แผน <b>' + roomSum[k].p + '</b></span><span class="stf-pill">มา <b>' + roomSum[k].a + '</b></span>' + (d < 0 ? '<span class="stf-pill bad">ขาด <b>' + (-d) + '</b></span>' : '<span class="stf-pill ok">ครบ</span>');
+      el.closest('.stf-room').classList.toggle('has-short', d < 0);
+    }
   });
   $('enSum').innerHTML = '<span>กรอกแล้ว <b>' + filled + '</b> จุด</span><span>ตามแผน <b>' + plan + '</b></span><span>มาปฏิบัติงาน <b>' + act + '</b></span>' +
     '<span class="' + (short ? 'bad' : '') + '">ขาด <b>' + short + '</b> คน' + (nShort ? ' (' + nShort + ' จุด)' : '') + '</span>';
@@ -379,13 +404,21 @@ function saveEntry() {
 
 /* ===== Dashboard ===== */
 function destroyCharts() { Object.keys(S.charts).forEach(function (k) { try { S.charts[k].destroy(); } catch (e) { } }); S.charts = {}; }
+function skeleton() {
+  return '<div class="stf-h" style="min-height:96px"><div><h1><span class="stf-hico">' + icon('layout-dashboard', '') + '</span>กำลังโหลด Dashboard…</h1></div></div>' +
+    '<div class="grid grid-cols-2 min-[900px]:grid-cols-5 gap-3 mb-3.5">' + [1, 2, 3, 4, 5].map(function () { return '<div class="m-skel" style="height:112px"></div>'; }).join('') + '</div>' +
+    '<div class="grid gap-3.5 grid-cols-1 min-[900px]:grid-cols-[2fr_1fr]"><div class="m-skel" style="height:360px"></div><div class="m-skel" style="height:360px"></div></div>';
+}
+function publicGone(e) { if (!S.token && /PUBLIC_OFF|ไม่ได้เปิดให้ดู/.test(e.message)) { S.publicOn = false; showLogin(); return true; } return false; }
 function renderDash() {
+  if (!S.meta) $('main').innerHTML = skeleton();
   ensureMeta().then(function (m) {
+    if (S.view !== 'dash') return;
     var st = S.dashState || { date: m.today, slotId: m.slots.length > 1 ? 'ALL' : (m.slots[0] && m.slots[0].id), days: 30 };
     S.dashState = st;
     $('main').innerHTML =
       '<div class="stf-print-only"><h2 style="margin:0">รายงานอัตรากำลัง ' + esc(m.org) + '</h2><div id="prDate"></div></div>' +
-      '<div class="flex flex-wrap items-end gap-3 mb-3.5 stf-h"><div><h1>Dashboard รายงานอัตรากำลังห้องเจาะเลือดและเก็บสิ่งส่งตรวจ</h1><div class="stf-sub" id="dsDateLong"></div></div><div class="flex flex-wrap items-end gap-2 md:ml-auto w-full md:w-auto stf-ctrl">' +
+      '<div class="flex flex-wrap items-end gap-3 mb-3.5 stf-h"><div><h1><span class="stf-hico">' + icon('layout-dashboard', '') + '</span>Dashboard รายงานอัตรากำลังห้องเจาะเลือดและเก็บสิ่งส่งตรวจ</h1><div class="stf-sub" id="dsDateLong"></div></div><div class="flex flex-wrap items-end gap-2 md:ml-auto w-full md:w-auto stf-ctrl">' +
       '<label class="stf-field">วันที่<input type="date" id="dsDate" class="input" value="' + esc(st.date) + '"></label>' +
       '<label class="stf-field">ช่วงเวลา<select id="dsSlot" class="select">' + (m.slots.length > 1 ? '<option value="ALL">ทุกช่วงเวลา</option>' : '') +
       m.slots.map(function (s) { return '<option value="' + esc(s.id) + '">' + esc(s.name) + '</option>'; }).join('') + '</select></label>' +
@@ -408,11 +441,12 @@ function renderDash() {
     $('dsCsv').onclick = exportDashCsv;
     if (!S.token) $('dsPdf').classList.add('stf-hide');
     if (S.preDash) { S.dash = S.preDash; S.preDash = null; drawDash(); } else loadDash();
-  }).catch(function (e) { toast('error', e.message); });
+  }).catch(function (e) { if (!publicGone(e)) toast('error', e.message); });
 }
 function loadDash() {
   var st = S.dashState;
-  call('getDashboard', st).then(function (d) { S.dash = d; drawDash(); }).catch(function (e) { toast('error', e.message); });
+  if ($('dsBody') && !$('dsBody').innerHTML) $('dsBody').innerHTML = skeleton().replace(/^<div class="stf-h"[\s\S]*?<\/div><\/div>/, '');
+  call('getDashboard', st).then(function (d) { if (S.view !== 'dash') return; S.dash = d; drawDash(); }).catch(function (e) { if (!publicGone(e)) toast('error', e.message); });
 }
 function kpi(label, val, unit, cls, desc, ico, first) {
   var tone = cls === 'bad' ? 'text-error' : (cls === 'ok' ? 'text-success' : '');
