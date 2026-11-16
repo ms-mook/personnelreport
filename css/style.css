@@ -30,6 +30,7 @@
   .stf-hide { display: none !important; }
 
   /* ---------- ส่วนประกอบเล็ก ๆ ที่ใช้ซ้ำ ---------- */
+  .stf-hlogo { width: 38px; height: 38px; flex: none; border-radius: 10px; box-shadow: 0 2px 6px rgba(225,29,72,.15); }
   .stf-logo { display: grid; place-items: center; flex: none; border-radius: 0.6rem; font-weight: 700; letter-spacing: .3px;
     color: var(--color-primary-content); background: linear-gradient(135deg, var(--color-primary), color-mix(in oklab, var(--color-primary) 70%, #7c3aed)); }
   .stf-sub { font-size: 12px; color: var(--stf-muted); }
@@ -37,14 +38,17 @@
   .stf-field { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; font-weight: 500; color: var(--stf-muted); }
   .stf-field > .input, .stf-field > .select { color: var(--color-base-content); font-weight: 400; font-size: 14.5px; }
   .stf-err { color: var(--color-error); font-size: 13px; min-height: 18px; }
+  .stf-nav .stf-ns { display: none; }
   .stf-nav .on { background: color-mix(in oklab, var(--color-primary) 12%, transparent); color: var(--color-primary); font-weight: 600; }
-  .stf-login { background:
-    radial-gradient(60rem 30rem at 85% -10%, color-mix(in oklab, var(--color-primary) 14%, transparent), transparent 60%),
-    radial-gradient(40rem 24rem at -10% 110%, color-mix(in oklab, var(--color-secondary) 12%, transparent), transparent 60%),
-    var(--color-base-200); }
   .stf-loading { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; background: rgba(255,255,255,.55); backdrop-filter: blur(1px); }
 
-  .stf-main { padding: 18px 20px 120px; max-width: 1280px; margin: 0 auto; }
+  .stf-main { padding: 20px clamp(16px, 2.2vw, 36px) 120px; max-width: none; margin: 0; }
+  /* ช่องควบคุมด้านบน: กว้างพอสำหรับวันที่/ช่วงเวลา ไม่ให้ตัวหนังสือซ้อนไอคอน */
+  .stf-ctrl .stf-field { flex: none; }
+  .stf-field input[type="date"].input { width: 11.5rem; min-width: 11.5rem; padding-inline: .75rem .5rem; }
+  .stf-field input[type="date"]::-webkit-calendar-picker-indicator { margin-left: 6px; cursor: pointer; opacity: .65; }
+  .stf-field select.select { min-width: 9.5rem; width: auto; padding-right: 2.2rem; }
+  .stf-ctrl .btn { height: 2.5rem; }
   .stf-main.wide { max-width: none; }
   .stf-h h1 { font-size: 20px; font-weight: 700; line-height: 1.3; }
   .stf-card h2 { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
@@ -67,7 +71,12 @@
   .stf-tbl tr.grp td { background: var(--color-base-200); font-weight: 600; color: var(--stf-muted); font-size: 13px; }
 
   /* ---------- หน้ากรอก ---------- */
-  .stf-room-h { display: flex; align-items: center; gap: 8px; font-weight: 700; margin-bottom: 8px; }
+  .stf-room-h { display: flex; align-items: baseline; flex-wrap: wrap; column-gap: 8px; row-gap: 2px; font-weight: 700; margin-bottom: 8px; }
+  .stf-room-h > :first-child { white-space: nowrap; }
+  /* หน้ากรอก: เต็มจอ — จอกว้างมากแบ่งห้องเป็น 2 คอลัมน์ */
+  #enBody { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; align-items: start; }
+  #enBody > .alert { grid-column: 1 / -1; margin-bottom: 0; }
+  @media (min-width: 1680px) { #enBody { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   .stf-room-h .stf-sub { font-weight: 400; }
   .stf-pt, .stf-pt-head { display: grid; grid-template-columns: minmax(180px, 1fr) 96px 96px 130px minmax(160px, 1fr); gap: 10px; align-items: center; }
   .stf-pt { padding: 10px 6px; border-top: 1px solid var(--color-base-200); border-radius: 8px; transition: background-color .25s ease; }
@@ -83,7 +92,7 @@
   .stf-pt .diff { display: flex; justify-content: center; }
   .stf-dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: var(--color-base-100); border-top: 1px solid var(--color-base-300);
     box-shadow: 0 -6px 16px rgba(16,24,40,.07); }
-  .stf-dock-in { max-width: 1280px; margin: 0 auto; padding: 10px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .stf-dock-in { max-width: none; margin: 0; padding: 10px clamp(16px, 2.2vw, 36px); display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
   .stf-dock .sum { display: flex; gap: 16px; font-size: 14px; color: var(--stf-muted); flex-wrap: wrap; }
   .stf-dock .sum b { color: var(--color-base-content); font-size: 18px; font-variant-numeric: tabular-nums; }
   .stf-dock .sum .bad b { color: var(--color-error); }
@@ -115,7 +124,8 @@
   /* ---------- Admin ---------- */
   .stf-form-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-bottom: 12px; }
   .stf-tabs { overflow-x: auto; margin-bottom: 14px; }
-  .stf-tabs .tab { white-space: nowrap; }
+  .stf-tabs .tab { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+  .stf-tabs .tab > svg { margin: 0 !important; }
 
   /* ---------- Modal ---------- */
   .stf-modal { z-index: 50; }
@@ -141,6 +151,9 @@
 
   /* ---------- มือถือ ---------- */
   @media (max-width: 720px) {
+    .stf-nav { gap: 4px; }
+    .stf-nav .btn { flex: 1 1 0; padding: 0 6px; gap: 5px; }
+    .stf-nav .stf-nl { display: none; } .stf-nav .stf-ns { display: inline; }
     .stf-sub.hide-sm { display: none; }
     .stf-main { padding: 12px 12px 150px; }
     .stf-pt-head { display: none; }
@@ -156,3 +169,116 @@
     .stf-kpi .v { font-size: 24px; }
     .stf-tbl-wrap .stf-tbl { min-width: 560px; }
   }
+
+/* =================== หน้าเข้าสู่ระบบ: fullscreen banner 60% | ฟอร์ม 40% =================== */
+.stf-login { position: relative; min-height: 100vh; min-height: 100dvh; display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 4fr); overflow: hidden; background: linear-gradient(180deg, #fff 0%, #f3f6f8 100%); }
+.stf-hero { position: relative; overflow: hidden; color: #fff; display: flex;
+  background: radial-gradient(110% 85% at 0% 0%, #1f8f86 0%, transparent 55%),
+              radial-gradient(80% 70% at 100% 100%, rgba(225,29,72,.55) 0%, transparent 60%),
+              linear-gradient(150deg, #083437 0%, #0d5552 48%, #0f3f4a 100%); }
+.stf-hero::before { content: ""; position: absolute; inset: 0; opacity: .12; pointer-events: none;
+  background-image: linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px);
+  background-size: 44px 44px; mask-image: radial-gradient(circle at 30% 40%, #000 0%, transparent 75%); -webkit-mask-image: radial-gradient(circle at 30% 40%, #000 0%, transparent 75%); }
+.stf-hero-glow { position: absolute; width: 46vmax; height: 46vmax; right: -16vmax; top: -18vmax; border-radius: 50%; filter: blur(70px);
+  background: radial-gradient(circle, rgba(94,234,212,.40), transparent 65%); pointer-events: none; }
+.stf-hero-in { position: relative; z-index: 2; display: flex; flex-direction: column; justify-content: center; gap: clamp(22px, 4.5vh, 44px); width: 100%;
+  padding: clamp(28px, 5vh, 56px) clamp(28px, 4.5vw, 80px); }
+.stf-hero-main { display: flex; align-items: center; gap: clamp(24px, 3.5vw, 64px); }
+.stf-hero-copy { flex: 1 1 0; min-width: 0; max-width: 640px; }
+.stf-kicker { display: inline-flex; align-items: center; gap: 12px; font-size: 13px; font-weight: 600; letter-spacing: .6px; text-transform: uppercase;
+  padding: 6px 16px 6px 6px; border-radius: 999px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); margin-bottom: 20px; }
+.stf-hero-copy h1 { font-size: clamp(30px, 3.2vw, 52px); font-weight: 700; line-height: 1.22; letter-spacing: -.3px; }
+.stf-hero-copy h1 span { display: inline-block; font-size: .6em; font-weight: 600; line-height: 1.35; margin-top: 8px;
+  background: linear-gradient(90deg, #99f6e4, #fff 75%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.stf-hero-copy p { margin-top: 14px; font-size: clamp(14px, 1.05vw, 16.5px); line-height: 1.75; opacity: .85; max-width: 560px; }
+.stf-hero-pulse { position: relative; width: 32px; height: 32px; flex: none; display: grid; place-items: center; border-radius: 50%; background: #e11d48; }
+.stf-hero-pulse svg { width: 17px; height: 17px; color: #fff; position: relative; z-index: 1; }
+.stf-hero-pulse span { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(253,164,175,.8); opacity: 0; }
+.stf-hero-logo { position: relative; flex: 0 0 auto; width: clamp(220px, 21vw, 380px); aspect-ratio: 1; display: grid; place-items: center; }
+.stf-hero-logo img { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: contain; padding: 7%; border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, #fff 60%, #eef7f6 100%); box-shadow: 0 30px 70px -20px rgba(0,0,0,.55), 0 0 0 8px rgba(255,255,255,.12); }
+.stf-hero-logo .ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(153,246,228,.55); opacity: 0; }
+.stf-hero-feats { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; max-width: 900px; }
+.stf-hero-feats li { display: flex; gap: 11px; align-items: flex-start; padding: 14px; border-radius: 14px;
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.16); backdrop-filter: blur(6px); }
+.stf-hero-feats li > span { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,.14); }
+.stf-hero-feats li svg { width: 19px; height: 19px; }
+.stf-hero-feats b { display: block; font-size: 14px; font-weight: 600; line-height: 1.35; }
+.stf-hero-feats small { display: block; font-size: 12.5px; opacity: .75; line-height: 1.5; margin-top: 2px; }
+.stf-hero-foot { display: flex; margin-top: auto; align-items: center; gap: 8px; font-size: 12.5px; opacity: .7; }
+.stf-hero-foot svg { width: 15px; height: 15px; }
+
+.stf-auth { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+  padding: 32px clamp(20px, 3.5vw, 56px) 20px; background: transparent; }
+.stf-auth-card { position: relative; z-index: 3; width: 100%; max-width: 410px; padding: 34px 32px 26px; border-radius: 22px;
+  background: rgba(255,255,255,.92); border: 1px solid var(--color-base-300); backdrop-filter: blur(8px);
+  box-shadow: 0 24px 60px -18px rgba(30,41,99,.28), 0 2px 6px rgba(30,41,99,.06); }
+.stf-auth-head { text-align: center; margin-bottom: 22px; }
+.stf-auth-logo { width: 56px; height: 56px; margin: 0 auto 12px; border-radius: 16px; box-shadow: 0 8px 20px rgba(225,29,72,.18); }
+.stf-auth-head h2 { font-size: 24px; font-weight: 700; }
+.stf-auth-head p { font-size: 13.5px; color: var(--stf-muted); margin-top: 2px; }
+.stf-lf { display: block; font-size: 13px; font-weight: 600; color: color-mix(in oklab, var(--color-base-content) 75%, transparent); margin: 12px 0 6px; }
+.stf-lin { position: relative; display: flex; align-items: center; height: 48px; border-radius: 12px; border: 1.5px solid var(--color-base-300);
+  background: #fff; transition: border-color .2s, box-shadow .2s; }
+.stf-lin:focus-within { border-color: var(--color-primary); box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-primary) 14%, transparent); }
+.stf-lin.bad { border-color: var(--color-error); }
+.stf-lin > svg { flex: none; width: 18px; height: 18px; margin: 0 4px 0 14px; color: var(--stf-muted); }
+.stf-lin input { flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: transparent; padding: 0 12px 0 8px; font-size: 16px; color: var(--color-base-content); }
+.stf-lin input::placeholder { color: color-mix(in oklab, var(--color-base-content) 38%, transparent); }
+.stf-eye { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border: 0; background: none; cursor: pointer; color: var(--stf-muted); border-radius: 10px; }
+.stf-eye:hover { color: var(--color-primary); }
+.stf-eye svg { width: 18px; height: 18px; }
+.stf-caps { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--color-warning); margin-top: 6px; }
+.stf-caps svg { width: 15px; height: 15px; }
+#loginForm .stf-err { margin-top: 10px; }
+.stf-login .btn-primary { --btn-color: #0f766e; background: linear-gradient(135deg, #0f766e, #0d9488); border-color: #0f766e; color: #fff; }
+.stf-login .stf-lin:focus-within { border-color: #0d9488; box-shadow: 0 0 0 4px rgba(13,148,136,.15); }
+.stf-lback { color: #0f766e !important; }
+.stf-lbtn { width: 100%; height: 48px; margin-top: 8px; border-radius: 12px; font-size: 16px; gap: 8px;
+  box-shadow: 0 10px 22px -8px rgba(13,148,136,.65); }
+.stf-lbtn svg { width: 18px; height: 18px; }
+.stf-lback { width: 100%; margin-top: 10px; gap: 8px; color: var(--color-primary); }
+.stf-lback svg { width: 17px; height: 17px; }
+.stf-auth-help { display: flex; gap: 6px; align-items: flex-start; justify-content: center; font-size: 12.5px; color: var(--stf-muted); margin-top: 16px; text-align: center; }
+.stf-auth-help svg { width: 14px; height: 14px; flex: none; margin-top: 2px; }
+.stf-auth-foot { position: relative; z-index: 3; font-size: 11.5px; color: var(--stf-muted); text-align: center; }
+
+/* เส้นชีพจร: วางพาดข้ามสองฝั่ง อยู่หลังการ์ดฟอร์ม */
+.stf-ecg { position: absolute; left: 0; right: 0; top: 64%; height: 110px; width: 100%; z-index: 1; pointer-events: none; overflow: visible; }
+.stf-ecg path { fill: none; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.stf-ecg .base { stroke: url(#ecgStroke); stroke-width: 1.6; opacity: .55; }
+.stf-ecg .beat { stroke: url(#ecgStroke); stroke-width: 3; filter: drop-shadow(0 0 6px rgba(253,164,175,.85)); }
+
+/* แท็บเล็ตแนวนอน / จอเล็ก */
+@media (max-width: 1400px) {
+  .stf-hero-feats { grid-template-columns: 1fr; max-width: 520px; }
+}
+@media (max-width: 1200px) {
+  .stf-login { grid-template-columns: minmax(0, 11fr) minmax(0, 9fr); }
+  .stf-hero-main { flex-direction: column-reverse; align-items: flex-start; gap: 22px; }
+  .stf-hero-logo { width: 190px; }
+}
+/* แท็บเล็ตแนวตั้ง + มือถือ: banner ย่อด้านบน ฟอร์มด้านล่าง */
+@media (max-width: 900px) {
+  .stf-login { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .stf-hero-in { padding: 22px 22px 54px; gap: 16px; }
+  .stf-hero-copy { margin-top: 0; }
+  .stf-hero-copy h1 { font-size: 22px; }
+  .stf-hero-copy p, .stf-hero-feats, .stf-hero-foot, .stf-kicker { display: none; }
+  .stf-hero-main { flex-direction: row; align-items: center; gap: 16px; }
+  .stf-hero-logo { width: 96px; order: -1; }
+  .stf-hero-logo img { box-shadow: 0 10px 24px -10px rgba(0,0,0,.5), 0 0 0 4px rgba(255,255,255,.14); padding: 5%; }
+  .stf-hero-copy h1 span { font-size: .62em; }
+  .stf-login { background: var(--color-base-200); }
+  .stf-auth { justify-content: flex-start; padding: 0 16px 18px; }
+  .stf-auth-card { margin-top: -34px; padding: 26px 20px 20px; max-width: 460px; }
+  .stf-auth-logo { display: none; }
+  .stf-ecg { top: 128px; height: 60px; }
+}
+@media (min-width: 600px) and (max-width: 900px) {
+  .stf-hero-copy p { display: block; font-size: 14px; }
+  .stf-hero-in { padding: 30px 36px 64px; }
+  .stf-hero-logo { width: 130px; }
+  .stf-hero-copy h1 { font-size: 28px; }
+  .stf-ecg { top: 196px; }
+}

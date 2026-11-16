@@ -102,7 +102,9 @@ function clearSession() { S.token = null; S.user = null; store('stf_tok', null);
 function showLogin(msg) {
   document.body.classList.remove('stf-admin-bg', 'stf-green-bg');
   $('vApp').classList.add('stf-hide'); $('vLogin').classList.remove('stf-hide');
-  $('lgErr').textContent = msg || ''; $('lgPin').value = '';
+  $('lgErr').textContent = msg || ''; $('lgPin').value = ''; $('lgPin').type = 'password'; loginBusy(false);
+  $('lgId').parentNode.classList.remove('bad'); $('lgPin').parentNode.classList.remove('bad');
+  window.scrollTo(0, 0);
   $('lgBack').classList.toggle('stf-hide', !S.publicOn);
   setTimeout(function () { $('lgId').focus(); }, 50);
 }
@@ -157,16 +159,41 @@ function showApp(user, org, meta) {
   document.querySelector('[data-view="admin"]').classList.toggle('stf-hide', user.role !== 'admin');
   go(canEntry ? 'entry' : 'dash');
 }
+function loginBusy(on) {
+  $('lgBtn').disabled = on;
+  $('lgSpin').classList.toggle('stf-hide', !on); $('lgIco').classList.toggle('stf-hide', on);
+  $('lgTxt').textContent = on ? 'กำลังเข้าสู่ระบบ…' : 'เข้าสู่ระบบ';
+}
+function loginFieldErr(id, msg) {
+  var box = $(id).parentNode; box.classList.remove('bad'); void box.offsetWidth; box.classList.add('bad');
+  $('lgErr').textContent = msg; $(id).focus();
+}
 $('loginForm').addEventListener('submit', function (e) {
   e.preventDefault();
-  $('lgErr').textContent = ''; $('lgBtn').disabled = true;
-  call('login', { staffId: $('lgId').value.trim(), pin: $('lgPin').value.trim() }).then(function (d) {
+  var id = $('lgId').value.trim(), pin = $('lgPin').value.trim();
+  $('lgErr').textContent = ''; $('lgId').parentNode.classList.remove('bad'); $('lgPin').parentNode.classList.remove('bad');
+  if (!id) return loginFieldErr('lgId', 'กรุณากรอกรหัสพนักงาน');
+  if (!/^\d{4,6}$/.test(pin)) return loginFieldErr('lgPin', 'PIN ต้องเป็นตัวเลข 4–6 หลัก');
+  loginBusy(true);
+  call('login', { staffId: id, pin: pin }, true).then(function (d) {
     S.token = d.token; store('stf_tok', d.token);
-    if (d.mustChange) return changePinDialog(true).then(function () { showApp(d.user, d.org); });
-    showApp(d.user, d.org);
-  }).catch(function (err) { $('lgErr').textContent = err.message; })
-    .then(function () { $('lgBtn').disabled = false; });
+    if (d.mustChange) return changePinDialog(true).then(function () { showApp(d.user, d.org, d.meta); });
+    showApp(d.user, d.org, d.meta);
+  }).catch(function (err) { loginFieldErr('lgPin', err.message); $('lgPin').select(); })
+    .then(function () { loginBusy(false); });
 });
+$('lgEye').addEventListener('click', function () {
+  var show = $('lgPin').type === 'password';
+  $('lgPin').type = show ? 'text' : 'password';
+  this.setAttribute('aria-label', show ? 'ซ่อน PIN' : 'แสดง PIN');
+  this.innerHTML = icon(show ? 'eye-off' : 'eye', '');
+  $('lgPin').focus();
+});
+['keydown', 'keyup'].forEach(function (ev) {
+  $('lgPin').addEventListener(ev, function (e) { if (e.getModifierState) $('lgCaps').classList.toggle('stf-hide', !e.getModifierState('CapsLock')); });
+});
+$('lgPin').addEventListener('input', function () { this.value = this.value.replace(/\D/g, '').slice(0, 6); });
+$('lgYear').textContent = String(new Date().getFullYear() + 543);
 function changePinDialog(forced) {
   return modal({
     title: forced ? 'ตั้ง PIN ใหม่ก่อนใช้งาน' : 'เปลี่ยน PIN', noCancel: forced, okText: 'บันทึก PIN',
@@ -268,11 +295,11 @@ function drawEntry() {
   else if (savedN) html += banner('info', 'วันนี้บันทึกไปแล้ว ' + savedN + ' จุด — แก้ไขตัวเลขแล้วกดบันทึกเพื่ออัปเดตได้');
   rooms.forEach(function (room) {
     var rs = reg.filter(function (r) { return r.room === room; });
-    html += '<div class="card bg-base-100 border border-base-300 shadow-sm p-4 stf-card stf-room"><div class="stf-room-h">ห้องเจาะเลือด ' + esc(room) + '<span class="stf-sub" data-room-sum="' + esc(room) + '"></span></div>' + head +
+    html += '<div class="card bg-base-100 border border-base-300 shadow-sm p-4 stf-card stf-room"><div class="stf-room-h"><span>' + icon('building-2', 'size-4 inline text-primary mr-1 align-[-2px]') + 'ห้องเจาะเลือด ' + esc(room) + '</span><span class="stf-sub" data-room-sum="' + esc(room) + '"></span></div>' + head +
       rs.map(function (r) { return ptRow(r, f.editable); }).join('') + '</div>';
   });
   if (occ.length) {
-    html += '<div class="card bg-base-100 border border-base-300 shadow-sm p-4 stf-card stf-room"><div class="stf-room-h">จุดเฉพาะวัน<span class="stf-sub">กรอกเฉพาะวันที่เปิดให้บริการ — เว้นช่อง "มาปฏิบัติงาน" ว่าง = ไม่เปิด</span></div>' + head +
+    html += '<div class="card bg-base-100 border border-base-300 shadow-sm p-4 stf-card stf-room"><div class="stf-room-h"><span>' + icon('calendar-plus', 'size-4 inline text-primary mr-1 align-[-2px]') + 'จุดเฉพาะวัน</span><span class="stf-sub">กรอกเฉพาะวันที่เปิดให้บริการ — เว้นช่อง "มาปฏิบัติงาน" ว่าง = ไม่เปิด</span></div>' + head +
       occ.map(function (r) { return ptRow(r, f.editable); }).join('') + '</div>';
   }
   $('enBody').innerHTML = html;
@@ -437,9 +464,9 @@ function drawDash() {
     '<div class="card bg-base-100 border border-base-300 shadow-sm p-4 stf-card"><h2>สรุปตามห้อง</h2>' +
     '<div class="stf-legend"><span><i style="background:#c3c9d4"></i>ตามแผน</span><span><i style="background:var(--stf-s1)"></i>มาปฏิบัติงาน</span></div>' +
     '<div class="stf-chart" style="height:200px"><canvas id="cRoom" role="img" aria-label="กราฟแท่งเปรียบเทียบแผนกับจำนวนที่มาปฏิบัติงานตามห้อง"></canvas></div>' +
-    '<table class="table table-sm stf-tbl" style="margin-top:8px"><thead><tr><th>ห้อง</th><th class="num">แผน</th><th class="num">มา</th><th class="num">ขาด</th></tr></thead><tbody>' +
+    '<div class="stf-tbl-wrap"><table class="table table-sm stf-tbl" style="margin-top:8px"><thead><tr><th>ห้อง</th><th class="num">แผน</th><th class="num">มา</th><th class="num">ขาด</th></tr></thead><tbody>' +
     d.byRoom.map(function (r) { return '<tr class="' + (r.short ? 'short' : '') + '"><td>' + esc(r.room) + '</td><td class="num">' + r.plan + '</td><td class="num">' + r.actual + '</td><td class="num">' + (r.short ? '<b class="text-error">' + r.short + '</b>' : '–') + '</td></tr>'; }).join('') +
-    '</tbody></table></div></div>';
+    '</tbody></table></div></div></div>';
   // แนวโน้ม
   html += '<div class="grid gap-3.5 stf-grid grid-cols-1 min-[900px]:grid-cols-2 mb-3.5">' +
     '<div class="card bg-base-100 border border-base-300 shadow-sm p-4 stf-card"><h2>แผนเทียบกับที่มาปฏิบัติงาน<small>' + esc(thDate(d.from)) + ' – ' + esc(thDate(d.date)) + '</small></h2>' +

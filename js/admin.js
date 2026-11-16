@@ -43,11 +43,11 @@ function adReport(d) {
     '<div class="card bg-base-100 border border-base-300 shadow-sm p-4 stf-card"><h2>ผู้รับรายงาน<small>' + d.recipients.filter(function (r) { return r.active; }).length + ' คนที่เปิดใช้งาน</small></h2>' +
     '<div class="stf-form-row"><label class="stf-field" style="flex:1 1 200px">อีเมล<input class="input" id="rcEmail" type="email" placeholder="name@hospital.go.th"></label>' +
     '<label class="stf-field" style="flex:1 1 160px">ชื่อ/ตำแหน่ง<input class="input" id="rcName" placeholder="เช่น หัวหน้ากลุ่มงาน"></label><button class="btn btn-sm btn-primary" id="rcAdd">' + icon('plus') + ' เพิ่ม</button></div>' +
-    '<table class="table table-sm stf-tbl"><thead><tr><th>อีเมล</th><th>ชื่อ</th><th>สถานะ</th><th></th></tr></thead><tbody>' +
+    '<div class="stf-tbl-wrap"><table class="table table-sm stf-tbl"><thead><tr><th>อีเมล</th><th>ชื่อ</th><th>สถานะ</th><th></th></tr></thead><tbody>' +
     (d.recipients.length ? d.recipients.map(function (r, i) {
       return '<tr><td>' + esc(r.email) + '</td><td>' + esc(r.name) + '</td><td>' + pill(r.active, 'รับ', 'หยุดรับ') + '</td><td style="white-space:nowrap">' +
         '<button class="btn btn-xs btn-outline" data-rt="' + i + '">' + (r.active ? 'หยุดส่ง' : 'เปิดส่ง') + '</button> <button class="btn btn-xs btn-outline btn-error" data-rd="' + i + '">ลบ</button></td></tr>';
-    }).join('') : '<tr><td colspan="4" class="stf-muted">ยังไม่มีผู้รับ</td></tr>') + '</tbody></table></div></div>';
+    }).join('') : '<tr><td colspan="4" class="stf-muted">ยังไม่มีผู้รับ</td></tr>') + '</tbody></table></div></div></div>';
   $('tgOn').onclick = function () { act(call('installTrigger'), 'ตั้งเวลาส่งรายงานเรียบร้อย'); };
   if ($('tgOff')) $('tgOff').onclick = function () { modal({ title: 'ปิดการส่งอัตโนมัติ?', danger: true, okText: 'ปิดการส่ง', html: 'ทีมบริหารจะไม่ได้รับอีเมลรายวันจนกว่าจะเปิดใหม่' }).then(function (ok) { if (ok) act(call('removeTrigger'), 'ปิดการส่งอัตโนมัติแล้ว'); }); };
   var test = function (toMe) {
@@ -96,9 +96,9 @@ function adPoints(d) {
 function adSlots(d) {
   $('adBody').innerHTML = '<div class="card bg-base-100 border border-base-300 shadow-sm p-4 stf-card"><h2>ช่วงเวลา / เวร<small>ระบบเดิมใช้ช่วง 08.30–12.30 น. — เพิ่มช่วงบ่าย/เวรดึกได้ที่นี่</small></h2>' +
     '<div class="stf-form-row"><label class="stf-field">ชื่อช่วงเวลา<input class="input" id="slName" placeholder="เช่น 12.30–16.30 น."></label><button class="btn btn-sm btn-primary" id="slAdd">' + icon('plus') + ' เพิ่ม</button></div>' +
-    '<table class="table table-sm stf-tbl"><thead><tr><th>รหัส</th><th>ชื่อช่วงเวลา</th><th class="num">ลำดับ</th><th>สถานะ</th><th></th></tr></thead><tbody>' +
+    '<div class="stf-tbl-wrap"><table class="table table-sm stf-tbl"><thead><tr><th>รหัส</th><th>ชื่อช่วงเวลา</th><th class="num">ลำดับ</th><th>สถานะ</th><th></th></tr></thead><tbody>' +
     d.slots.map(function (s, i) { return '<tr><td>' + esc(s.id) + '</td><td>' + esc(s.name) + '</td><td class="num">' + s.order + '</td><td>' + pill(s.active) + '</td><td><button class="btn btn-xs btn-outline" data-se="' + i + '">แก้ไข</button></td></tr>'; }).join('') +
-    '</tbody></table></div>';
+    '</tbody></table></div></div>';
   $('slAdd').onclick = function () { act(call('saveSlot', { name: $('slName').value }), 'เพิ่มช่วงเวลาแล้ว').catch(function () { }); };
   Array.prototype.forEach.call(document.querySelectorAll('[data-se]'), function (b) {
     b.onclick = function () {
@@ -160,11 +160,11 @@ function adData(d) {
     AD.dataFrom = $('dtFrom').value; AD.dataTo = $('dtTo').value;
     call('listData', { from: AD.dataFrom, to: AD.dataTo }).then(function (rows) {
       AD.rows = rows;
-      $('dtList').innerHTML = '<div class="stf-muted" style="margin-bottom:6px">' + rows.length + ' แถว</div><table class="table table-sm stf-tbl"><thead><tr><th>วันที่</th><th>ช่วงเวลา</th><th>ห้อง</th><th>จุดปฏิบัติงาน</th><th class="num">แผน</th><th class="num">ปัจจุบัน</th><th>สถานะ</th><th>หมายเหตุ</th><th>ผู้บันทึก</th><th></th></tr></thead><tbody>' +
+      $('dtList').innerHTML = '<div class="stf-muted" style="margin-bottom:6px">' + rows.length + ' แถว</div><div class="stf-tbl-wrap"><table class="table table-sm stf-tbl"><thead><tr><th>วันที่</th><th>ช่วงเวลา</th><th>ห้อง</th><th>จุดปฏิบัติงาน</th><th class="num">แผน</th><th class="num">ปัจจุบัน</th><th>สถานะ</th><th>หมายเหตุ</th><th>ผู้บันทึก</th><th></th></tr></thead><tbody>' +
         rows.map(function (r, i) {
           return '<tr class="' + (r.diff < 0 ? 'short' : '') + '"><td>' + thDate(r.date) + '</td><td>' + esc(r.slot) + '</td><td>' + esc(r.room) + '</td><td>' + esc(r.point) + '</td><td class="num">' + r.plan + '</td><td class="num">' + r.actual + '</td><td>' + statusBadge(r.diff) +
             '</td><td>' + esc(r.note) + '</td><td class="stf-muted">' + esc(r.by) + '</td><td><button class="btn btn-xs btn-outline btn-error" data-dd="' + i + '">ลบ</button></td></tr>';
-        }).join('') + '</tbody></table>';
+        }).join('') + '</tbody></table></div>';
       Array.prototype.forEach.call(document.querySelectorAll('[data-dd]'), function (b) {
         b.onclick = function () {
           var r = AD.rows[b.getAttribute('data-dd')];

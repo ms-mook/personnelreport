@@ -252,7 +252,7 @@ function login_(p) {
   cache.put('tok_' + token, JSON.stringify(user), SESSION_SEC);
   sh_(SH_().USERS).getRange(u.row, 8).setValue(new Date());
   log_(user.id, 'login', '');
-  return { token: token, user: user, mustChange: bool_(u.r[6]), appName: APP_NAME, org: settings_().ORG_NAME };
+  return { token: token, user: user, mustChange: bool_(u.r[6]), appName: APP_NAME, org: settings_().ORG_NAME, meta: getMeta_() };
 }
 function session_(token) {
   if (!token || typeof token !== 'string') return null;

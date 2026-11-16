@@ -39,6 +39,29 @@
   /* โครงรอโหลด (skeleton) */
   .m-skel { border-radius: .6rem; min-height: 1em; background: linear-gradient(90deg, var(--color-base-200) 25%, var(--color-base-300) 45%, var(--color-base-200) 65%); background-size: 200% 100%; animation: m-shimmer 1.3s linear infinite; }
 
+  /* ---------- หน้า login: เส้นชีพจรวิ่ง + วงชีพจร ---------- */
+  .stf-ecg .beat { stroke-dasharray: 260 1340; stroke-dashoffset: 1600; animation: m-ecg 3.6s linear infinite; }
+  @keyframes m-ecg { from { stroke-dashoffset: 1600; } to { stroke-dashoffset: 0; } }
+  .stf-hero-pulse span { animation: m-pulse-ring 2.4s cubic-bezier(.2,.6,.3,1) infinite; }
+  .stf-hero-pulse span:nth-child(2) { animation-delay: .8s; }
+  .stf-hero-pulse span:nth-child(3) { animation-delay: 1.6s; }
+  @keyframes m-pulse-ring { 0% { transform: scale(1); opacity: .8; } 100% { transform: scale(2.3); opacity: 0; } }
+  .stf-hero-pulse svg { animation: m-heartbeat 1.2s ease-in-out infinite; }
+  .stf-hero-logo .ring { animation: m-logo-ring 3.2s cubic-bezier(.2,.6,.3,1) infinite; }
+  .stf-hero-logo .r2 { animation-delay: 1.6s; }
+  @keyframes m-logo-ring { 0% { transform: scale(1); opacity: .7; } 100% { transform: scale(1.28); opacity: 0; } }
+  .stf-hero-logo img { animation: m-float 6s ease-in-out infinite; }
+  @keyframes m-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  @keyframes m-heartbeat { 0%, 100% { transform: scale(1); } 14% { transform: scale(1.18); } 28% { transform: scale(1); } 42% { transform: scale(1.12); } 70% { transform: scale(1); } }
+  .stf-auth-logo { animation: m-heartbeat 1.2s ease-in-out infinite; }
+  .stf-hero-glow { animation: m-glow 9s ease-in-out infinite alternate; }
+  @keyframes m-glow { from { transform: translate(0, 0) scale(1); opacity: .8; } to { transform: translate(-5vmax, 4vmax) scale(1.12); opacity: 1; } }
+  .stf-hero-copy, .stf-hero-logo, .stf-hero-feats li, .stf-auth-card { animation: m-fade-up .6s cubic-bezier(.22,.8,.3,1) both; }
+  .stf-hero-feats li:nth-child(1) { animation-delay: .12s; } .stf-hero-feats li:nth-child(2) { animation-delay: .2s; } .stf-hero-feats li:nth-child(3) { animation-delay: .28s; }
+  .stf-auth-card { animation-delay: .08s; }
+  .stf-lin.bad { animation: m-shake .35s ease; }
+  @keyframes m-shake { 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   }

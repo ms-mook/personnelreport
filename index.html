@@ -4,10 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>รายงานอัตรากำลัง — หน่วยเจาะเลือดเก็บสิ่งส่งตรวจและ POCT</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%233b4fd8%27/%3E%3Ctext x=%2716%27 y=%2721%27 font-size=%2711%27 font-family=%27sans-serif%27 font-weight=%27700%27 text-anchor=%27middle%27 fill=%27white%27%3EBRS%3C/text%3E%3C/svg%3E">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="/img/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <meta name="theme-color" content="#0f5f5c">
 
   <!-- ===== ไลบรารีจาก CDN (jsDelivr ทั้งหมด) ===== -->
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preload" href="/img/brs-logo.webp" as="image" type="image/webp">
   <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css">
   <!-- Tailwind สร้างไว้ล่วงหน้า (npm run css) — ไม่ต้องแปลงในเบราว์เซอร์ -->
   <link href="/css/tailwind.css" rel="stylesheet">
@@ -22,44 +26,90 @@
 </head>
 <body class="bg-base-200 text-base-content min-h-screen">
 
-  <!-- ===== หน้าเข้าสู่ระบบ ===== -->
-  <div id="vLogin" class="stf-login stf-hide min-h-screen grid place-items-center p-5">
-    <div class="card bg-base-100 border border-base-300 shadow-xl w-full max-w-sm m-pop">
-      <div class="card-body p-7 gap-0">
-        <div class="stf-logo size-12 text-sm mb-3">BRS</div>
-        <h1 class="text-xl font-bold">รายงานอัตรากำลัง</h1>
-        <div class="stf-muted">หน่วยเจาะเลือดเก็บสิ่งส่งตรวจและ POCT</div>
-        <form id="loginForm" autocomplete="off" class="mt-3 flex flex-col gap-3">
-          <label class="stf-field">รหัสพนักงาน (Staff ID)
-            <span class="input w-full"><i data-lucide="user-round" class="size-4 opacity-60"></i>
-              <input id="lgId" autocomplete="username" required placeholder="เช่น S001"></span>
-          </label>
-          <label class="stf-field">PIN
-            <span class="input w-full"><i data-lucide="key-round" class="size-4 opacity-60"></i>
-              <input id="lgPin" type="password" inputmode="numeric" autocomplete="current-password" required placeholder="••••"></span>
-          </label>
-          <button class="btn btn-primary w-full mt-2" type="submit" id="lgBtn"><i data-lucide="log-in" class="size-4"></i> เข้าสู่ระบบ</button>
-          <div class="stf-err" id="lgErr"></div>
-        </form>
-        <button type="button" class="btn btn-ghost btn-sm w-full stf-hide" id="lgBack"><i data-lucide="arrow-left" class="size-4"></i> ดู Dashboard โดยไม่ต้องเข้าสู่ระบบ</button>
+  <!-- ===== หน้าเข้าสู่ระบบ (fullscreen: banner 60% | ฟอร์ม 40%) ===== -->
+  <div id="vLogin" class="stf-login stf-hide">
+    <section class="stf-hero">
+      <div class="stf-hero-glow" aria-hidden="true"></div>
+      <div class="stf-hero-in">
+        <div class="stf-hero-main">
+          <div class="stf-hero-copy">
+            <div class="stf-kicker"><span class="stf-hero-pulse" aria-hidden="true"><span></span><span></span><span></span><i data-lucide="heart-pulse"></i></span>BRS · Blood Room Srinagarind</div>
+            <h1>รายงานอัตรากำลัง<br><span>ห้องเจาะเลือดและเก็บสิ่งส่งตรวจ</span></h1>
+            <p>หน่วยเจาะเลือดเก็บสิ่งส่งตรวจและ POCT — ติดตามจำนวนบุคลากรเทียบแผนทุกช่วงเวลา แจ้งทีมบริหารได้ทันทีทุกวัน</p>
+          </div>
+          <div class="stf-hero-logo">
+            <span class="ring r1" aria-hidden="true"></span><span class="ring r2" aria-hidden="true"></span>
+            <img src="/img/brs-logo.webp" alt="โลโก้ BRS Blood Room Srinagarind รายงานอัตรากำลัง" width="677" height="720" fetchpriority="high">
+          </div>
+        </div>
+        <ul class="stf-hero-feats">
+          <li><span><i data-lucide="clipboard-pen-line"></i></span><div><b>กรอกง่ายรายช่วงเวลา</b><small>บันทึกตามจุดปฏิบัติงาน เห็นจุดขาดทันที</small></div></li>
+          <li><span><i data-lucide="layout-dashboard"></i></span><div><b>Dashboard แบบเรียลไทม์</b><small>ร้อยละอัตรากำลัง กราฟแนวโน้ม จุดที่ขาดบ่อย</small></div></li>
+          <li><span><i data-lucide="mail-check"></i></span><div><b>ส่งรายงานอีเมลอัตโนมัติ</b><small>พร้อมไฟล์ PDF ถึงทีมบริหารทุกวัน</small></div></li>
+        </ul>
+        <div class="stf-hero-foot"><i data-lucide="shield-check"></i> ข้อมูลภายในหน่วยงาน · เข้าสู่ระบบด้วยรหัสพนักงานและ PIN</div>
       </div>
-    </div>
+    </section>
+
+    <section class="stf-auth">
+      <div class="stf-auth-card">
+        <div class="stf-auth-head">
+          <img src="/img/logo.svg" alt="" class="stf-auth-logo">
+          <h2>เข้าสู่ระบบ</h2>
+          <p>สำหรับเจ้าหน้าที่และผู้ดูแลระบบ</p>
+        </div>
+        <form id="loginForm" autocomplete="off" novalidate>
+          <label class="stf-lf" for="lgId">รหัสพนักงาน (Staff ID)</label>
+          <div class="stf-lin">
+            <i data-lucide="user-round"></i>
+            <input id="lgId" autocomplete="username" autocapitalize="characters" spellcheck="false" required placeholder="เช่น S001">
+          </div>
+          <label class="stf-lf" for="lgPin">PIN</label>
+          <div class="stf-lin">
+            <i data-lucide="key-round"></i>
+            <input id="lgPin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="6" required placeholder="ตัวเลข 4–6 หลัก">
+            <button type="button" class="stf-eye" id="lgEye" aria-label="แสดง PIN" title="แสดง/ซ่อน PIN"><i data-lucide="eye"></i></button>
+          </div>
+          <div class="stf-caps stf-hide" id="lgCaps"><i data-lucide="arrow-big-up-dash"></i> เปิด Caps Lock อยู่</div>
+          <div class="stf-err" id="lgErr" role="alert" aria-live="polite"></div>
+          <button class="btn btn-primary stf-lbtn" type="submit" id="lgBtn">
+            <span class="loading loading-spinner loading-sm stf-hide" id="lgSpin"></span>
+            <span id="lgIco" class="inline-flex"><i data-lucide="log-in"></i></span><span id="lgTxt">เข้าสู่ระบบ</span>
+          </button>
+        </form>
+        <button type="button" class="btn btn-ghost stf-lback stf-hide" id="lgBack"><i data-lucide="layout-dashboard"></i> ดู Dashboard โดยไม่ต้องเข้าสู่ระบบ</button>
+        <p class="stf-auth-help"><i data-lucide="circle-help"></i> ลืม PIN หรือเข้าไม่ได้ ติดต่อผู้ดูแลระบบให้ตั้ง PIN ใหม่</p>
+      </div>
+      <footer class="stf-auth-foot">© <span id="lgYear">2569</span> BRS Staffing Report · หน่วยเจาะเลือดเก็บสิ่งส่งตรวจและ POCT</footer>
+    </section>
+
+    <!-- เส้นชีพจร (ECG) วิ่งข้ามทั้งสองฝั่ง -->
+    <svg class="stf-ecg" viewBox="0 0 1600 120" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="ecgStroke" x1="0" x2="1600" y1="0" y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#fff" stop-opacity=".15"/><stop offset=".45" stop-color="#fff" stop-opacity=".9"/>
+          <stop offset=".6" stop-color="#fda4af"/><stop offset=".61" stop-color="#e11d48"/><stop offset="1" stop-color="#e11d48" stop-opacity=".7"/>
+        </linearGradient>
+      </defs>
+      <path class="base" d="M0 70 H140 l14-22 16 50 18-82 18 78 12-24 H420 l14-22 16 50 18-82 18 78 12-24 H700 l14-22 16 50 18-82 18 78 12-24 H980 l14-22 16 50 18-82 18 78 12-24 H1480 l14-22 16 50 18-82 18 78 12-24 H1600"/>
+      <path class="beat" d="M0 70 H140 l14-22 16 50 18-82 18 78 12-24 H420 l14-22 16 50 18-82 18 78 12-24 H700 l14-22 16 50 18-82 18 78 12-24 H980 l14-22 16 50 18-82 18 78 12-24 H1480 l14-22 16 50 18-82 18 78 12-24 H1600"/>
+    </svg>
   </div>
 
   <!-- ===== ตัวแอป ===== -->
   <div id="vApp" class="stf-hide">
     <header class="stf-top navbar sticky top-0 z-30 bg-base-100 border-b border-base-300 shadow-sm px-3 md:px-5 gap-x-3 gap-y-1 flex-wrap min-h-14">
       <div class="flex items-center gap-3 min-w-0">
-        <div class="stf-logo size-9 text-xs">BRS</div>
+        <img src="/img/logo.svg" alt="BRS" class="stf-hlogo">
         <div class="leading-tight min-w-0">
           <div class="font-bold">รายงานอัตรากำลัง</div>
           <div class="stf-sub hide-sm truncate" id="orgName"></div>
         </div>
       </div>
       <nav class="stf-nav flex gap-1 order-3 md:order-none w-full md:w-auto md:ml-4 overflow-x-auto" id="nav">
-        <button data-view="entry" class="btn btn-ghost btn-sm stf-hide"><i data-lucide="square-pen" class="size-4"></i> กรอกอัตรากำลัง</button>
-        <button data-view="dash" class="btn btn-ghost btn-sm"><i data-lucide="layout-dashboard" class="size-4"></i> Dashboard</button>
-        <button data-view="admin" class="btn btn-ghost btn-sm stf-hide"><i data-lucide="shield-check" class="size-4"></i> ผู้ดูแลระบบ</button>
+        <button data-view="entry" class="btn btn-ghost btn-sm stf-hide"><i data-lucide="square-pen" class="size-4"></i><span class="stf-nl">กรอกอัตรากำลัง</span><span class="stf-ns">กรอก</span></button>
+        <button data-view="dash" class="btn btn-ghost btn-sm"><i data-lucide="layout-dashboard" class="size-4"></i><span class="stf-nl">Dashboard</span><span class="stf-ns">Dashboard</span></button>
+        <button data-view="admin" class="btn btn-ghost btn-sm stf-hide"><i data-lucide="shield-check" class="size-4"></i><span class="stf-nl">ผู้ดูแลระบบ</span><span class="stf-ns">ผู้ดูแล</span></button>
       </nav>
       <div class="stf-user flex items-center gap-2 ml-auto text-sm">
         <button class="btn btn-primary btn-sm stf-hide" id="btnLogin"><i data-lucide="log-in" class="size-4"></i> เข้าสู่ระบบ</button>
